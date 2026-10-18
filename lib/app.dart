@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'data/mock_data.dart';
 import 'models/chat_message.dart';
+import 'models/dating_profile.dart';
+import 'features/discover/discover_screen.dart';
 
 class KliKApp extends StatefulWidget {
   const KliKApp({super.key});
@@ -17,8 +19,11 @@ class _KliKAppState extends State<KliKApp> {
   static const _navy = Color(0xFF202B3D);
 
   int activeTabIndex = 0;
-  int currentProfileIndex = 0;
   final Set<String> likedProfileIds = {};
+  ProfileFilter profileFilter = const ProfileFilter(
+    ageRange: RangeValues(18, 40),
+    maxDistanceKm: 50,
+  );
   String? selectedConversationId;
   final Map<String, List<ChatMessage>> messagesByProfile = {
     for (final entry in mockMessagesByProfile.entries)
@@ -50,6 +55,14 @@ class _KliKAppState extends State<KliKApp> {
 
   @override
   Widget build(BuildContext context) {
+    final discoverProfiles = mockProfiles
+        .where(
+          (profile) =>
+              profile.age >= profileFilter.ageRange.start &&
+              profile.age <= profileFilter.ageRange.end &&
+              profile.distanceKm <= profileFilter.maxDistanceKm,
+        )
+        .toList();
     final colorScheme =
         ColorScheme.fromSeed(
           seedColor: _coral,
@@ -88,7 +101,16 @@ class _KliKAppState extends State<KliKApp> {
         appBar: AppBar(title: const Text('KLiK')),
         body: IndexedStack(
           index: activeTabIndex,
-          children: [for (final tab in _tabs) _PlaceholderTab(content: tab)],
+          children: [
+            DiscoverScreen(
+              profiles: discoverProfiles,
+              onPass: (_) {},
+              onLike: _recordLike,
+              onSuperLike: _recordLike,
+              onFilter: (filter) => setState(() => profileFilter = filter),
+            ),
+            for (final tab in _tabs.skip(1)) _PlaceholderTab(content: tab),
+          ],
         ),
         bottomNavigationBar: NavigationBar(
           selectedIndex: activeTabIndex,
@@ -121,6 +143,10 @@ class _KliKAppState extends State<KliKApp> {
         ),
       ),
     );
+  }
+
+  void _recordLike(DatingProfile profile) {
+    setState(() => likedProfileIds.add(profile.id));
   }
 }
 
