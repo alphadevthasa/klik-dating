@@ -145,6 +145,7 @@ class _KliKAppState extends State<KliKApp> {
     Navigator.of(navigatorContext).push<void>(
       MaterialPageRoute<void>(
         builder: (routeContext) => Scaffold(
+          backgroundColor: _blush,
           body: MatchScreen(
             profile: profile,
             onSendMessage: () {

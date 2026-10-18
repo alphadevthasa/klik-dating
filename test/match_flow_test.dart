@@ -3,41 +3,66 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:klik/app.dart';
 import 'package:klik/data/mock_data.dart';
 import 'package:klik/features/match/match_screen.dart';
+import 'package:lottie/lottie.dart';
+
+const _matchCopy = 'Mulai obrolan dan kenali satu sama lain lebih dekat.';
 
 void main() {
-  testWidgets('mutual like opens match and message opens that conversation', (
+  testWidgets('liking Nadia shows match and opens her Chat conversation', (
     tester,
   ) async {
     await tester.pumpWidget(const KliKApp());
 
-    for (final profile in mockProfiles) {
-      expect(find.text('${profile.name}, ${profile.age}'), findsOneWidget);
-      await tester.tap(find.byKey(const Key('discover-like')));
-      await tester.pumpAndSettle();
+    expect(find.text('Nadia, 27'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('discover-like')));
+    await tester.pumpAndSettle();
 
-      if (!profile.mutualMatch) {
-        expect(find.byKey(const Key('match-animation')), findsNothing);
-      }
-    }
-
-    expect(find.text('Kamu dan Alya saling suka!'), findsOneWidget);
+    expect(find.text('Kalian cocok!'), findsOneWidget);
+    expect(find.text(_matchCopy), findsOneWidget);
     expect(find.byKey(const Key('match-animation')), findsOneWidget);
+    final matchLottie = tester.widget<LottieBuilder>(
+      find.byKey(const Key('match-lottie')),
+    );
+    expect(matchLottie.repeat, isFalse);
+    expect(find.text('Kirim pesan'), findsOneWidget);
+    expect(find.text('Lanjut lihat profil lain'), findsOneWidget);
+    expect(find.byType(NavigationBar), findsNothing);
+
+    final alyaPhoto = find.byWidgetPredicate(
+      (widget) => widget is Image && widget.semanticLabel == 'Foto Alya',
+    );
+    final nadiaPhoto = find.byWidgetPredicate(
+      (widget) => widget is Image && widget.semanticLabel == 'Foto Nadia',
+    );
+    expect(alyaPhoto, findsOneWidget);
+    expect(nadiaPhoto, findsOneWidget);
+    expect(
+      tester.getRect(alyaPhoto).overlaps(tester.getRect(nadiaPhoto)),
+      isTrue,
+    );
+
+    final matchScaffold = tester.widget<Scaffold>(
+      find
+          .ancestor(
+            of: find.byType(MatchScreen),
+            matching: find.byType(Scaffold),
+          )
+          .first,
+    );
+    expect(matchScaffold.backgroundColor, const Color(0xFFF6E4E5));
 
     final dynamic appState = tester.state<State<StatefulWidget>>(
       find.byType(KliKApp),
     );
-    expect(
-      appState.likedProfileIds,
-      containsAll(mockProfiles.map((profile) => profile.id)),
-    );
+    expect(appState.likedProfileIds, contains('profile-1'));
 
     await tester.tap(find.text('Kirim pesan'));
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('chat-composer')), findsOneWidget);
-    expect(find.text('Alya'), findsOneWidget);
-    expect(find.text('Hai, senang bisa kenalan!'), findsOneWidget);
-    expect(find.byType(NavigationBar), findsNothing);
+    expect(find.text('Nadia'), findsOneWidget);
+    expect(find.text('Mulai percakapanmu di sini.'), findsOneWidget);
+    expect(find.byType(NavigationBar), findsOneWidget);
   });
 
   testWidgets('reduced motion keeps match copy and both actions available', (
@@ -48,7 +73,7 @@ void main() {
         home: MediaQuery(
           data: const MediaQueryData(disableAnimations: true),
           child: MatchScreen(
-            profile: mockProfiles.last,
+            profile: mockProfiles.first,
             onSendMessage: () {},
             onContinue: () {},
           ),
@@ -56,13 +81,21 @@ void main() {
       ),
     );
 
-    expect(find.text('Kamu dan Alya saling suka!'), findsOneWidget);
+    expect(find.text('Kalian cocok!'), findsOneWidget);
+    expect(find.text(_matchCopy), findsOneWidget);
     expect(find.text('Kirim pesan'), findsOneWidget);
     expect(find.text('Lanjut lihat profil lain'), findsOneWidget);
+    expect(find.byKey(const Key('match-static-heart')), findsOneWidget);
+    expect(find.byKey(const Key('match-lottie')), findsNothing);
     expect(
-      find.descendant(
-        of: find.byKey(const Key('match-animation')),
-        matching: find.byType(Icon),
+      find.byWidgetPredicate(
+        (widget) => widget is Image && widget.semanticLabel == 'Foto Alya',
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.byWidgetPredicate(
+        (widget) => widget is Image && widget.semanticLabel == 'Foto Nadia',
       ),
       findsOneWidget,
     );
@@ -73,16 +106,14 @@ void main() {
   ) async {
     await tester.pumpWidget(const KliKApp());
 
-    for (final _ in mockProfiles) {
-      await tester.tap(find.byKey(const Key('discover-like')));
-      await tester.pumpAndSettle();
-    }
+    await tester.tap(find.byKey(const Key('discover-like')));
+    await tester.pumpAndSettle();
 
     await tester.tap(find.text('Lanjut lihat profil lain'));
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('match-animation')), findsNothing);
-    expect(find.text('Untuk saat ini, belum ada profil baru.'), findsOneWidget);
+    expect(find.text('Nabila, 25'), findsOneWidget);
     expect(find.byType(NavigationBar), findsOneWidget);
   });
 }
