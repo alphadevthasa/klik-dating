@@ -177,7 +177,7 @@ Run `flutter test test/discover_flow_test.dart` and `flutter analyze`. Expected:
 **Files:** `pubspec.yaml`, `assets/animations/like_burst.json`, `lib/app.dart`, `lib/features/discover/discover_screen.dart`, `lib/features/chat/chat_screen.dart`, `lib/widgets/klik_brand.dart`, `lib/data/mock_data.dart`, `test/widget_test.dart`, `test/discover_flow_test.dart`, `test/chat_flow_test.dart`
 
 **Interfaces:**
-- `KliKBrand({double logoSize = 34, bool showTagline = true, Color? color, Alignment alignment = Alignment.center})` supports centered navy Discover/Match and left-aligned coral Likes/Profil headers.
+- `KliKBrand({double logoSize = 34, bool showTagline = true, Color? color, Alignment alignment = Alignment.center})` uses the exact tagline `Temukan koneksi yang klik`, centered navy on Discover/Match and left-aligned coral on Likes/Profil.
 - First `mockProfiles` fixture is Nadia, 27, Bandung, with coffee/book/travel/sunset interests and deterministic mutual-match behavior.
 - `DiscoverScreen` retains `CardSwiperController`, filter callbacks, and existing left/pass, right/like, up/super-like behavior.
 - A non-match right swipe displays local `like_burst.json`; reduced motion uses a static heart.
@@ -217,7 +217,7 @@ Add a finite heart-burst Lottie JSON asset and register it in `pubspec.yaml`; do
 
 - [ ] **Step 3: Rebuild the Match composition**
 
-Use the blush backdrop, decorative coral heart/ray shapes, overlapping circular photos, centered Lottie heart, “Kalian cocok!” headline, concise supporting copy, full-width coral `Kirim pesan`, and lighter `Lanjut lihat profil lain` action.
+Use the centered navy KLiK wordmark/tagline, blush backdrop, decorative coral heart/ray shapes, overlapping circular photos, centered Lottie heart, “Kalian cocok!” headline, concise supporting copy, full-width coral `Kirim pesan`, and lighter `Lanjut lihat profil lain` action.
 
 - [ ] **Step 4: Verify animation and reduced motion**
 
@@ -294,7 +294,28 @@ Likes uses a two-column grid; blur photo tiles, overlay a centered lock, and sho
 
 Run `flutter test test/widget_test.dart test/chat_flow_test.dart` and `flutter analyze`. Expected: both reference screens render, local edit/photo choices update state, and bottom navigation remains persistent.
 
-## Task 12: Run full visual and functional acceptance
+## Task 12: Align brand lockup and Match header
+
+**Files:** `lib/widgets/klik_brand.dart`, `lib/features/discover/discover_screen.dart`, `lib/features/match/match_screen.dart`, `test/widget_test.dart`, `test/match_flow_test.dart`
+
+**Interfaces:**
+- KLiK tagline is exactly `Temukan koneksi yang klik`.
+- Discover/Match wordmark color is deep navy; Likes/Profil wordmark color is coral.
+- Match screen starts with centered wordmark/tagline above the two-photo Lottie composition.
+
+- [ ] **Step 1: Write brand-reference assertions**
+
+Update widget tests to assert the exact tagline and brand colors on Discover, Likes, and Profil. Update Match test to assert tagline and navy KLiK wordmark above the match visual. Run focused files and confirm reference assertions fail before implementation.
+
+- [ ] **Step 2: Align shared wordmark and screen placement**
+
+Use deep navy as `KliKBrand` default, keep explicit coral on Likes/Profil, replace old tagline text, and add the centered brand/tagline header to Match. Preserve current screen flow, Lottie timing, and reduced-motion behavior.
+
+- [ ] **Step 3: Verify brand and Match visuals**
+
+Run `flutter test test/widget_test.dart test/match_flow_test.dart` and `flutter analyze`. Expected: color/tagline assertions pass and all existing interactions remain intact.
+
+## Task 13: Run full visual and functional acceptance
 
 **Files:** all app and test files above.
 

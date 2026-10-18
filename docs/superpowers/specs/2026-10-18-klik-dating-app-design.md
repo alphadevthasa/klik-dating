@@ -10,7 +10,7 @@ Build an interactive Flutter dating-app prototype inspired by the supplied KLiK 
 - Indonesian-language consumer mobile app.
 - Warm cream and blush surfaces, coral-pink actions, and deep navy text, following the reference closely.
 - Profile photography anchors a nearly full-height Discover card, with a bottom scrim for legible profile details.
-- KLiK wordmark uses navy on Discover/Match and coral on Likes/Profil, matching the supplied screens.
+- KLiK wordmark uses navy on Discover/Match and coral on Likes/Profil, matching the supplied screens. Tagline reads “Temukan koneksi yang klik”.
 - Flutter Material widgets provide the foundation. Use `flutter_card_swiper` for the animated Discover stack and local Lottie assets for like feedback and match celebration; avoid a state-management or UI-kit dependency.
 
 ## Screens and navigation
@@ -22,7 +22,7 @@ Four bottom tabs use the Indonesian labels **Temukan**, **Likes**, **Chat**, and
 3. **Chat** — conversation list and a reference-style detail view with avatar/name/online header, timestamped incoming/outgoing bubbles, composer controls, and bottom navigation.
 4. **Profil** — coral KLiK header with filter/notification actions, circular editable profile photo, verified name/age, city, bio, interest chips, 80% completion progress, and coral “Edit profil” action.
 
-Match success opens as a focused full-screen view. It uses a soft blush backdrop, overlapping circular profile photos, a centered animated heart burst, “Kalian cocok!” copy, and primary/secondary actions. The Chat detail remains inside its tab so the bottom navigation stays visible as shown in the reference.
+Match success opens as a focused full-screen view. It uses a centered navy KLiK wordmark/tagline, soft blush backdrop, overlapping circular profile photos, a centered animated heart burst, “Kalian cocok!” copy, and primary/secondary actions. The Chat detail remains inside its tab so the bottom navigation stays visible as shown in the reference.
 
 ## Interaction behavior
 
