@@ -20,4 +20,23 @@ class DatingProfile {
   final double distanceKm;
   final List<String> interests;
   final bool mutualMatch;
+
+  DatingProfile copyWith({
+    String? name,
+    int? age,
+    String? city,
+    String? bio,
+    String? imageUrl,
+    List<String>? interests,
+  }) => DatingProfile(
+    id: id,
+    name: name ?? this.name,
+    age: age ?? this.age,
+    city: city ?? this.city,
+    bio: bio ?? this.bio,
+    imageUrl: imageUrl ?? this.imageUrl,
+    distanceKm: distanceKm,
+    interests: interests ?? this.interests,
+    mutualMatch: mutualMatch,
+  );
 }

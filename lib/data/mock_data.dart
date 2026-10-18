@@ -77,6 +77,57 @@ const mockProfiles = <DatingProfile>[
   ),
 ];
 
+const mockIncomingLikes = <DatingProfile>[
+  DatingProfile(
+    id: 'incoming-1',
+    name: 'Sofia',
+    age: 27,
+    city: 'Jakarta',
+    bio: '',
+    imageUrl:
+        'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=900',
+    distanceKm: 12,
+    interests: [],
+    mutualMatch: false,
+  ),
+  DatingProfile(
+    id: 'incoming-2',
+    name: 'Mira',
+    age: 25,
+    city: 'Jakarta',
+    bio: '',
+    imageUrl:
+        'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=900',
+    distanceKm: 9,
+    interests: [],
+    mutualMatch: false,
+  ),
+  DatingProfile(
+    id: 'incoming-3',
+    name: 'Tara',
+    age: 29,
+    city: 'Jakarta',
+    bio: '',
+    imageUrl:
+        'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=900',
+    distanceKm: 16,
+    interests: [],
+    mutualMatch: false,
+  ),
+  DatingProfile(
+    id: 'incoming-4',
+    name: 'Dina',
+    age: 32,
+    city: 'Jakarta',
+    bio: '',
+    imageUrl:
+        'https://images.unsplash.com/photo-1524250502761-1ac6f2e30d43?w=900',
+    distanceKm: 35,
+    interests: [],
+    mutualMatch: false,
+  ),
+];
+
 const mockMessagesByProfile = <String, List<ChatMessage>>{
   'profile-1': [
     ChatMessage(

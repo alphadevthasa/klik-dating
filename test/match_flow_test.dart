@@ -74,6 +74,7 @@ void main() {
           data: const MediaQueryData(disableAnimations: true),
           child: MatchScreen(
             profile: mockProfiles.first,
+            currentProfile: mockCurrentProfile,
             onSendMessage: () {},
             onContinue: () {},
           ),
@@ -114,6 +115,7 @@ void main() {
         home: Scaffold(
           body: MatchScreen(
             profile: mockProfiles.first,
+            currentProfile: mockCurrentProfile,
             onSendMessage: () {},
             onContinue: () {},
           ),

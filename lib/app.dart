@@ -24,6 +24,7 @@ class _KliKAppState extends State<KliKApp> {
 
   int activeTabIndex = 0;
   final Set<String> likedProfileIds = {};
+  DatingProfile currentProfile = mockCurrentProfile;
   ProfileFilter profileFilter = const ProfileFilter(
     ageRange: RangeValues(18, 40),
     maxDistanceKm: 50,
@@ -87,12 +88,7 @@ class _KliKAppState extends State<KliKApp> {
                     _recordLike(navigatorContext, profile),
                 onFilter: (filter) => setState(() => profileFilter = filter),
               ),
-              LikesScreen(
-                profiles: mockProfiles
-                    .where((profile) => likedProfileIds.contains(profile.id))
-                    .toList(),
-                onOpenConversation: _openConversation,
-              ),
+              LikesScreen(incomingLikes: mockIncomingLikes),
               ChatScreen(
                 profiles: mockProfiles,
                 conversationId: selectedConversationId,
@@ -101,7 +97,11 @@ class _KliKAppState extends State<KliKApp> {
                 onBack: () => setState(() => selectedConversationId = null),
                 onSendMessage: _sendMessage,
               ),
-              ProfileScreen(profile: mockCurrentProfile),
+              ProfileScreen(
+                profile: currentProfile,
+                onSaveProfile: _saveCurrentProfile,
+                onSelectPhoto: _selectCurrentProfilePhoto,
+              ),
             ],
           ),
           bottomNavigationBar: NavigationBar(
@@ -148,6 +148,7 @@ class _KliKAppState extends State<KliKApp> {
           backgroundColor: _blush,
           body: MatchScreen(
             profile: profile,
+            currentProfile: currentProfile,
             onSendMessage: () {
               Navigator.of(routeContext).pop();
               _openConversation(profile.id);
@@ -164,6 +165,16 @@ class _KliKAppState extends State<KliKApp> {
       selectedConversationId = profileId;
       activeTabIndex = 2;
     });
+  }
+
+  void _saveCurrentProfile(DatingProfile profile) {
+    setState(() => currentProfile = profile);
+  }
+
+  void _selectCurrentProfilePhoto(String imageUrl) {
+    setState(
+      () => currentProfile = currentProfile.copyWith(imageUrl: imageUrl),
+    );
   }
 
   void _sendMessage(String profileId, String text) {

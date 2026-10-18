@@ -287,13 +287,13 @@ void main() {
     expect(find.text('Jakarta'), findsOneWidget);
   });
 
-  testWidgets('liked profiles open a conversation and Like has empty state', (
+  testWidgets('incoming Likes stay separate from profiles liked in Discover', (
     tester,
   ) async {
     await tester.pumpWidget(const KliKApp());
     await tester.tap(find.text('Likes'));
     await tester.pumpAndSettle();
-    expect(find.text('Belum ada profil yang kamu sukai.'), findsOneWidget);
+    expect(find.byIcon(Icons.lock_rounded), findsNWidgets(4));
 
     await tester.tap(find.text('Temukan'));
     await tester.pumpAndSettle();
@@ -301,14 +301,22 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('discover-like')));
     await tester.pumpAndSettle();
+
+    final dynamic appState = tester.state<State<StatefulWidget>>(
+      find.byType(KliKApp),
+    );
+    expect(appState.likedProfileIds, contains('profile-2'));
+
     await tester.tap(find.text('Likes'));
     await tester.pumpAndSettle();
+    expect(find.byIcon(Icons.lock_rounded), findsNWidgets(4));
+    expect(find.text('Nabila, 25'), findsNothing);
 
+    await tester.tap(find.text('Chat'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Nabila, 25'));
     await tester.pumpAndSettle();
-
     expect(find.text('Nabila'), findsOneWidget);
-    expect(find.text(', 25'), findsOneWidget);
     expect(find.byTooltip('Kirim pesan'), findsOneWidget);
   });
 }

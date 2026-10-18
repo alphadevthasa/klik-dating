@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 
-import '../../data/mock_data.dart';
 import '../../models/dating_profile.dart';
 
 class MatchScreen extends StatelessWidget {
   const MatchScreen({
     super.key,
     required this.profile,
+    required this.currentProfile,
     required this.onSendMessage,
     required this.onContinue,
   });
 
   final DatingProfile profile;
+  final DatingProfile currentProfile;
   final VoidCallback onSendMessage;
   final VoidCallback onContinue;
 
@@ -35,6 +36,7 @@ class MatchScreen extends StatelessWidget {
                       aspectRatio: 1.18,
                       child: _MatchVisual(
                         profile: profile,
+                        currentProfile: currentProfile,
                         reduceMotion: reduceMotion,
                       ),
                     ),
@@ -96,9 +98,14 @@ class MatchScreen extends StatelessWidget {
 }
 
 class _MatchVisual extends StatelessWidget {
-  const _MatchVisual({required this.profile, required this.reduceMotion});
+  const _MatchVisual({
+    required this.profile,
+    required this.currentProfile,
+    required this.reduceMotion,
+  });
 
   final DatingProfile profile;
+  final DatingProfile currentProfile;
   final bool reduceMotion;
 
   @override
@@ -120,8 +127,9 @@ class _MatchVisual extends StatelessWidget {
                 Transform.translate(
                   offset: Offset(overlap, 0),
                   child: _ProfilePhoto(
-                    profile: mockCurrentProfile,
+                    profile: currentProfile,
                     size: photoSize,
+                    imageKey: const Key('match-current-profile-photo'),
                   ),
                 ),
                 Transform.translate(
@@ -201,10 +209,15 @@ class _MatchDecoration extends StatelessWidget {
 }
 
 class _ProfilePhoto extends StatelessWidget {
-  const _ProfilePhoto({required this.profile, required this.size});
+  const _ProfilePhoto({
+    required this.profile,
+    required this.size,
+    this.imageKey,
+  });
 
   final DatingProfile profile;
   final double size;
+  final Key? imageKey;
 
   @override
   Widget build(BuildContext context) => SizedBox.square(
@@ -222,6 +235,7 @@ class _ProfilePhoto extends StatelessWidget {
         child: ClipOval(
           child: Image.network(
             profile.imageUrl,
+            key: imageKey,
             fit: BoxFit.cover,
             semanticLabel: 'Foto ${profile.name}',
             errorBuilder: (context, error, stackTrace) => ColoredBox(
