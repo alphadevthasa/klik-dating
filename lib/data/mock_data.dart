@@ -78,6 +78,34 @@ const mockProfiles = <DatingProfile>[
 ];
 
 const mockMessagesByProfile = <String, List<ChatMessage>>{
+  'profile-1': [
+    ChatMessage(
+      text: 'Hai! Senang bisa kenalan 😊',
+      isMine: false,
+      timeLabel: '09:12',
+    ),
+    ChatMessage(
+      text: 'Hai Nadia! Aku juga senang 😊',
+      isMine: true,
+      timeLabel: '09:13',
+    ),
+    ChatMessage(text: 'Kamu lagi apa?', isMine: false, timeLabel: '09:14'),
+    ChatMessage(
+      text: 'Baru selesai ngopi. Kamu?',
+      isMine: true,
+      timeLabel: '09:15',
+    ),
+    ChatMessage(
+      text: 'Aku baru bikin kopi juga ☕',
+      isMine: false,
+      timeLabel: '09:16',
+    ),
+    ChatMessage(
+      text: 'Wah, kapan-kapan ngopi bareng yuk!',
+      isMine: true,
+      timeLabel: '09:17',
+    ),
+  ],
   'profile-2': [
     ChatMessage(
       text: 'Hai! Ada rekomendasi tempat makan enak?',

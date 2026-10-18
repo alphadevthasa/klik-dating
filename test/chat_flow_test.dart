@@ -11,35 +11,36 @@ void main() {
     await tester.tap(find.text('Chat'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Nabila, 25'), findsOneWidget);
-    await tester.tap(find.text('Nabila, 25'));
+    expect(find.text('Nadia, 27'), findsOneWidget);
+    await tester.tap(find.text('Nadia, 27'));
     await tester.pumpAndSettle();
 
     expect(find.byTooltip('Kembali ke daftar chat'), findsOneWidget);
     final dynamic appState = tester.state<State<StatefulWidget>>(
       find.byType(KliKApp),
     );
-    final messageCount = appState.messagesByProfile['profile-2'].length as int;
+    final messageCount = appState.messagesByProfile['profile-1'].length as int;
 
     await tester.enterText(find.byKey(const Key('chat-composer')), 'Hai!');
     await tester.tap(find.byKey(const Key('chat-send')));
     await tester.pumpAndSettle();
 
     expect(find.text('Hai!'), findsOneWidget);
-    expect(appState.messagesByProfile['profile-2'].length, messageCount + 1);
-    expect(appState.messagesByProfile['profile-2'].last.isMine, isTrue);
+    expect(appState.messagesByProfile['profile-1'].length, messageCount + 1);
+    expect(appState.messagesByProfile['profile-1'].last.isMine, isTrue);
 
+    await tester.enterText(find.byKey(const Key('chat-composer')), '   ');
     await tester.tap(find.byKey(const Key('chat-send')));
     await tester.pumpAndSettle();
 
-    expect(appState.messagesByProfile['profile-2'].length, messageCount + 1);
+    expect(appState.messagesByProfile['profile-1'].length, messageCount + 1);
   });
 
   testWidgets('composer remains above the visible keyboard', (tester) async {
     await tester.pumpWidget(const KliKApp());
     await tester.tap(find.text('Chat'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Nabila, 25'));
+    await tester.tap(find.text('Nadia, 27'));
     await tester.pumpAndSettle();
     tester.view.viewInsets = const FakeViewPadding(bottom: 300);
     await tester.showKeyboard(find.byKey(const Key('chat-composer')));
@@ -65,8 +66,8 @@ void main() {
     await tester.pumpWidget(const KliKApp());
     await tester.tap(find.text('Chat'));
     await tester.pumpAndSettle();
-    expect(find.text('Nabila, 25'), findsOneWidget);
-    await tester.tap(find.text('Nabila, 25'));
+    expect(find.text('Nadia, 27'), findsOneWidget);
+    await tester.tap(find.text('Nadia, 27'));
     await tester.pumpAndSettle();
 
     await tester.tap(find.byTooltip('Kembali ke daftar chat'));
@@ -80,17 +81,74 @@ void main() {
     expect(find.text('Pencinta kopi, musik, dan cerita baru.'), findsOneWidget);
   });
 
-  testWidgets('conversation detail keeps tabs visible and back restores list', (
+  testWidgets('Nadia chat matches reference inside the Chat tab', (
     tester,
   ) async {
+    final semantics = tester.ensureSemantics();
     await tester.pumpWidget(const KliKApp());
     await tester.tap(find.text('Chat'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Nabila, 25'));
+    expect(find.text('Nadia, 27'), findsOneWidget);
+    await tester.tap(find.text('Nadia, 27'));
     await tester.pumpAndSettle();
 
     expect(find.byType(NavigationBar), findsOneWidget);
+    expect(
+      tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
+      2,
+    );
+    final dynamic appState = tester.state<State<StatefulWidget>>(
+      find.byType(KliKApp),
+    );
+    expect(appState.selectedConversationId, 'profile-1');
+    expect(appState.activeTabIndex, 2);
     expect(find.text('KLiK'), findsNothing);
+    expect(find.text('Nadia'), findsOneWidget);
+    expect(find.text(', 27'), findsOneWidget);
+    expect(find.text('Online'), findsOneWidget);
+    expect(find.text('Hari ini'), findsOneWidget);
+    expect(find.text('Hai! Senang bisa kenalan 😊'), findsOneWidget);
+    expect(find.text('Hai Nadia! Aku juga senang 😊'), findsOneWidget);
+    expect(find.text('09:12'), findsOneWidget);
+    expect(find.text('09:13'), findsOneWidget);
+    await tester.drag(find.byType(ListView), const Offset(0, -500));
+    await tester.pumpAndSettle();
+    expect(find.text('09:16'), findsOneWidget);
+    expect(find.text('09:17'), findsOneWidget);
+    expect(find.byTooltip('Panggil Nadia'), findsOneWidget);
+    expect(find.byTooltip('Opsi chat'), findsOneWidget);
+    expect(find.byTooltip('Tambahkan lampiran'), findsOneWidget);
+    expect(find.byTooltip('Pilih emoji'), findsOneWidget);
+    expect(find.byTooltip('Kirim pesan'), findsOneWidget);
+    expect(find.byIcon(Icons.done_all), findsWidgets);
+    final avatar = find
+        .byWidgetPredicate(
+          (widget) =>
+              widget is Semantics && widget.properties.label == 'Foto Nadia',
+        )
+        .first;
+    expect(tester.getSemantics(avatar).getSemanticsData().label, 'Foto Nadia');
+
+    await tester.tap(find.byTooltip('Tambahkan lampiran'));
+    await tester.pumpAndSettle();
+    expect(find.text('Kamera'), findsOneWidget);
+    await tester.tap(find.text('Kamera'));
+    await tester.pumpAndSettle();
+    expect(find.text('Lampiran demo belum tersedia.'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 5));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('Pilih emoji'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('😊'));
+    await tester.pumpAndSettle();
+    expect(
+      tester
+          .widget<TextField>(find.byKey(const Key('chat-composer')))
+          .controller!
+          .text,
+      '😊',
+    );
 
     await tester.tap(find.byTooltip('Kembali ke daftar chat'));
     await tester.pumpAndSettle();
@@ -98,6 +156,8 @@ void main() {
     expect(find.byType(NavigationBar), findsOneWidget);
     expect(find.text('KLiK'), findsNothing);
     expect(find.text('Percakapan'), findsOneWidget);
+    expect(find.text('Nadia, 27'), findsOneWidget);
+    semantics.dispose();
   });
 
   testWidgets('Profil shows the current Alya demo profile', (tester) async {
@@ -138,6 +198,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Nabila'), findsOneWidget);
+    expect(find.text(', 25'), findsOneWidget);
     expect(find.byTooltip('Kirim pesan'), findsOneWidget);
   });
 }
