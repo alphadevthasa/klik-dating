@@ -23,4 +23,16 @@ void main() {
     expect(find.text('Jakarta'), findsOneWidget);
     expect(find.byType(NavigationBar), findsOneWidget);
   });
+
+  testWidgets('Discover layout fits a 390x844 viewport', (tester) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(390, 844);
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(const KliKApp());
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+  });
 }

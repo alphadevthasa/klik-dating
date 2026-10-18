@@ -407,13 +407,13 @@ class ProfileCard extends StatelessWidget {
                                 size: 16,
                               ),
                               const SizedBox(width: 4),
-                              Text(
-                                profile.city,
-                                style: const TextStyle(color: Colors.white),
-                              ),
-                              Text(
-                                ' · ${profile.distanceKm.round()} km dari kamu',
-                                style: const TextStyle(color: Colors.white),
+                              Expanded(
+                                child: Text(
+                                  '${profile.city} · ${profile.distanceKm.round()} km dari kamu',
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(color: Colors.white),
+                                ),
                               ),
                             ],
                           ),
