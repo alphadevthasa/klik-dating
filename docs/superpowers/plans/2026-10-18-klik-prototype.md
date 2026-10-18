@@ -127,7 +127,7 @@ Run `flutter test test/chat_flow_test.dart` and `flutter analyze`. Expected: mes
 **Files:** `assets/animations/match.json`, `pubspec.yaml`, `lib/features/match/match_screen.dart`, `lib/app.dart`, `test/match_flow_test.dart`
 
 **Interfaces:**
-- `MatchScreen({required DatingProfile profile, required VoidCallback onSendMessage, required VoidCallback onContinue})`.
+- `MatchScreen({required DatingProfile currentProfile, required DatingProfile profile, required VoidCallback onSendMessage, required VoidCallback onContinue})` uses editable current-profile data.
 - Like action adds profile ID to Like state. For the first fixture, configured with `mutualMatch == true`, app opens Match; other likes stay in the Like tab.
 - `onSendMessage` opens Chat focused on the matched profile while retaining its bottom navigation; `onContinue` returns to Discover.
 
@@ -177,7 +177,7 @@ Run `flutter test test/discover_flow_test.dart` and `flutter analyze`. Expected:
 **Files:** `pubspec.yaml`, `assets/animations/like_burst.json`, `lib/app.dart`, `lib/features/discover/discover_screen.dart`, `lib/features/chat/chat_screen.dart`, `lib/widgets/klik_brand.dart`, `lib/data/mock_data.dart`, `test/widget_test.dart`, `test/discover_flow_test.dart`, `test/chat_flow_test.dart`
 
 **Interfaces:**
-- `KliKBrand({double logoSize = 34})` renders centered KLiK wordmark, small heart mark, and Indonesian tagline; accent color is configurable for the reference's screen variants.
+- `KliKBrand({double logoSize = 34, bool showTagline = true, Color? color, Alignment alignment = Alignment.center})` supports centered navy Discover/Match and left-aligned coral Likes/Profil headers.
 - First `mockProfiles` fixture is Nadia, 27, Bandung, with coffee/book/travel/sunset interests and deterministic mutual-match behavior.
 - `DiscoverScreen` retains `CardSwiperController`, filter callbacks, and existing left/pass, right/like, up/super-like behavior.
 - A non-match right swipe displays local `like_burst.json`; reduced motion uses a static heart.
@@ -270,11 +270,12 @@ Run the focused widget test, `flutter test test/widget_test.dart`, and `flutter 
 
 ## Task 11: Rebuild Likes and Profil tabs to reference
 
-**Files:** `lib/app.dart`, `lib/data/mock_data.dart`, `lib/features/likes/likes_screen.dart`, `lib/features/profile/profile_screen.dart`, `test/widget_test.dart`, `test/chat_flow_test.dart`
+**Files:** `lib/app.dart`, `lib/data/mock_data.dart`, `lib/features/likes/likes_screen.dart`, `lib/features/profile/profile_screen.dart`, `lib/features/match/match_screen.dart`, `lib/widgets/klik_brand.dart`, `test/widget_test.dart`, `test/chat_flow_test.dart`
 
 **Interfaces:**
 - Likes receives deterministic incoming-like fixtures, separate from profiles the user liked.
-- Profil receives editable current-user state and callbacks for profile editing and demo-photo selection.
+- Profil receives editable current-user state and callbacks for profile editing and demo-photo selection; current edits also flow into Match.
+- `KliKBrand` exposes alignment, color, and tagline visibility so these tabs match their coral left-aligned header.
 - Bottom navigation labels are Temukan, Likes, Chat, Profil and remains visible on both tabs.
 
 - [ ] **Step 1: Write Likes/Profile visual and interaction tests**
