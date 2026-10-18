@@ -13,7 +13,7 @@
 - Use Flutter Material widgets as the foundation, `flutter_card_swiper` for the Discover stack, and local `lottie` animations for like feedback and match celebration.
 - Keep local sample data and UI state in memory; app restart resets state.
 - Use Indonesian UI copy and the approved cream/blush, coral-pink, and deep-navy palette.
-- Include Discover, Like, Chat, and Profil tabs; Match opens full-screen, while an open Chat conversation keeps bottom navigation visible.
+- Include Temukan, Likes, Chat, and Profil tabs; Match opens full-screen, while an open Chat conversation keeps bottom navigation visible.
 - Keep login, backend, durable storage, real matching service, and production moderation out of scope.
 - Respect reduced-motion settings, label icon-only actions, and keep touch targets and photo contrast accessible.
 
@@ -27,9 +27,9 @@
 - `lib/widgets/klik_brand.dart` — shared KLiK wordmark/tagline header.
 - `lib/models/dating_profile.dart` — profile fixture shape.
 - `lib/models/chat_message.dart` — local message shape.
-- `lib/data/mock_data.dart` — deterministic sample profiles and conversations.
+- `lib/data/mock_data.dart` — deterministic candidate, incoming-like, current-profile, and conversation fixtures.
 - `lib/features/discover/discover_screen.dart` — `CardSwiper` profile stack, action buttons, and filter sheet.
-- `lib/features/likes/likes_screen.dart` — liked-profile list and conversation shortcut.
+- `lib/features/likes/likes_screen.dart` — blurred incoming-like grid and local information sheet.
 - `lib/features/chat/chat_screen.dart` — conversation list, conversation view, and message composer.
 - `lib/features/profile/profile_screen.dart` — current demo profile.
 - `lib/features/match/match_screen.dart` — mutual-match celebration and next actions.
@@ -102,7 +102,7 @@ Run `flutter test test/discover_flow_test.dart` and `flutter analyze`. Expected:
 **Files:** `lib/features/likes/likes_screen.dart`, `lib/features/chat/chat_screen.dart`, `lib/features/profile/profile_screen.dart`, `lib/app.dart`, `test/chat_flow_test.dart`
 
 **Interfaces:**
-- `LikesScreen({required List<DatingProfile> profiles, required ValueChanged<String> onOpenConversation})`.
+- `LikesScreen({required List<DatingProfile> incomingLikes, required VoidCallback onUnlockLikes})`.
 - `ChatScreen({required List<DatingProfile> profiles, required String? conversationId, required Map<String, List<ChatMessage>> messagesByProfile, required ValueChanged<String> onOpenConversation, required VoidCallback onBack, required void Function(String profileId, String text) onSendMessage})`; conversation detail stays within Chat tab.
 - `ProfileScreen({required DatingProfile profile})`.
 
@@ -112,7 +112,7 @@ Create `test/chat_flow_test.dart`. Pump `KliKApp`, open a sample chat, enter `Ha
 
 - [ ] **Step 2: Implement Like and Profil tabs**
 
-Show liked fixtures in Like, with an action to open that profile's conversation. Show the current demo profile, interests, and photo in Profil. Add empty state for an empty Like list.
+Show a basic local incoming-Likes preview with its lock action. Show the current demo profile, interests, and photo in Profil. Task 10 applies final reference styling to both tabs.
 
 - [ ] **Step 3: Implement conversation list, messages, and composer**
 
@@ -174,49 +174,50 @@ Run `flutter test test/discover_flow_test.dart` and `flutter analyze`. Expected:
 
 ## Task 7: Match Discover and app shell to reference
 
-**Files:** `lib/app.dart`, `lib/features/discover/discover_screen.dart`, `lib/widgets/klik_brand.dart`, `lib/data/mock_data.dart`, `test/widget_test.dart`, `test/discover_flow_test.dart`
+**Files:** `pubspec.yaml`, `assets/animations/like_burst.json`, `lib/app.dart`, `lib/features/discover/discover_screen.dart`, `lib/features/chat/chat_screen.dart`, `lib/widgets/klik_brand.dart`, `lib/data/mock_data.dart`, `test/widget_test.dart`, `test/discover_flow_test.dart`, `test/chat_flow_test.dart`
 
 **Interfaces:**
-- `KliKBrand({double logoSize = 34})` renders centered KLiK wordmark, small heart mark, and Indonesian tagline.
+- `KliKBrand({double logoSize = 34})` renders centered KLiK wordmark, small heart mark, and Indonesian tagline; accent color is configurable for the reference's screen variants.
 - First `mockProfiles` fixture is Nadia, 27, Bandung, with coffee/book/travel/sunset interests and deterministic mutual-match behavior.
 - `DiscoverScreen` retains `CardSwiperController`, filter callbacks, and existing left/pass, right/like, up/super-like behavior.
+- A non-match right swipe displays local `like_burst.json`; reduced motion uses a static heart.
+- Opening a conversation sets `selectedConversationId` and Chat tab index without pushing a route; bottom navigation remains visible.
 
 - [ ] **Step 1: Write Discover visual assertions**
 
-Update widget tests to assert KLiK brand/tagline, first profile name/location/interests, profile-count badge, verification badge, three action controls, and persistent four-tab navigation. Run `flutter test test/widget_test.dart test/discover_flow_test.dart`; confirm new reference-specific assertions fail before implementation.
+Update widget tests to assert KLiK brand/tagline, first profile name/location/interests, profile-count badge, verification badge, three action controls, and persistent tabs labelled Temukan, Likes, Chat, Profil. Add tests that a non-match like shows its Lottie feedback and an open Chat conversation retains the tab bar. Run focused Discover/Chat tests; confirm new assertions fail before implementation.
 
 - [ ] **Step 2: Update local demo fixtures**
 
-Set first Discover fixture to Nadia, 27, Bandung, with the approved reference copy/interests and `mutualMatch: true`. Set the current demo profile to Raka, 28, with a male portrait fixture. Preserve at least five profiles and distinct ages/distances for filtering and card count.
+Set first Discover fixture to Nadia, 27, Bandung, with the approved reference copy/interests and `mutualMatch: true`. Set current demo profile to Alya, 26, Jakarta, as shown in Profil reference. Preserve at least five profiles and distinct ages/distances for filtering and card count.
 
 - [ ] **Step 3: Rebuild Discover shell and profile card**
 
-Remove the generic global AppBar. Add the reusable KLiK brand header with profile/filter actions. Let the profile photo fill remaining height in a rounded card; overlay its count badge, bottom scrim, verified name, location, bio, and interest chips. Use three large circular pass/super-like/like controls and a compact persistent bottom bar matching the reference. Preserve image-error fallback and contrast.
+Remove the generic global AppBar. Add the reusable KLiK brand header with profile/filter actions. Let the profile photo fill remaining height in a rounded card; overlay its count badge, bottom scrim, verified name, location, bio, and interest chips. Use three large circular pass/super-like/like controls and a compact persistent bottom bar matching the reference. Keep Chat conversation detail inside its tab. Preserve image-error fallback and contrast.
 
 - [ ] **Step 4: Verify Discover screen**
 
 Run `flutter test test/widget_test.dart test/discover_flow_test.dart` and `flutter analyze`. Expected: all prior interactions pass and reference-specific content is present.
 
-## Task 8: Refine Lottie like and match effects
+## Task 8: Refine Lottie match effect
 
-**Files:** `assets/animations/like_burst.json`, `assets/animations/match.json`, `pubspec.yaml`, `lib/features/discover/discover_screen.dart`, `lib/features/match/match_screen.dart`, `lib/app.dart`, `test/match_flow_test.dart`
+**Files:** `assets/animations/match.json`, `pubspec.yaml`, `lib/features/match/match_screen.dart`, `lib/app.dart`, `test/match_flow_test.dart`
 
 **Interfaces:**
-- `like_burst.json` is a finite heart-pop overlay after a non-match right-swipe/button like.
 - `match.json` is a finite coral heart burst with rays/sparkles between the two profile photos.
-- Both effects are local and honor reduced motion; static UI remains complete without animation.
+- The match effect is local and honors reduced motion; static UI remains complete without animation.
 
 - [ ] **Step 1: Write Lottie flow assertions**
 
-Update `test/match_flow_test.dart` to verify Nadia's like opens the match screen with both profile photos, `Kalian cocok!`, the match animation, and both actions. Add a non-match like test for the brief heart effect. Run the focused file and confirm the new visual assertions fail before screen/asset changes.
+Update `test/match_flow_test.dart` to verify Nadia's like opens the match screen with both profile photos, `Kalian cocok!`, the match animation, and both actions. Run the focused file and confirm the new visual assertions fail before screen/asset changes.
 
 - [ ] **Step 2: Bundle local animations**
 
-Add finite heart-burst Lottie JSON assets and register both in `pubspec.yaml`; do not fetch animation files at runtime.
+Add a finite heart-burst Lottie JSON asset and register it in `pubspec.yaml`; do not fetch animation files at runtime.
 
 - [ ] **Step 3: Rebuild the Match composition**
 
-Use the blush backdrop, decorative coral heart/ray shapes, overlapping circular photos, centered Lottie heart, “Kalian cocok!” headline, concise supporting copy, full-width coral `Kirim pesan`, and lighter `Lanjut lihat profil lain` action. Use the like effect only for ordinary likes so match celebration remains the primary motion.
+Use the blush backdrop, decorative coral heart/ray shapes, overlapping circular photos, centered Lottie heart, “Kalian cocok!” headline, concise supporting copy, full-width coral `Kirim pesan`, and lighter `Lanjut lihat profil lain` action.
 
 - [ ] **Step 4: Verify animation and reduced motion**
 
@@ -247,7 +248,32 @@ Create a compact custom header with avatar/name/age/online status, call and over
 
 Run `flutter test test/chat_flow_test.dart` and `flutter analyze`. Expected: visual assertions, local send, empty-send handling, back-to-list, and keyboard layout pass.
 
-## Task 10: Run full visual and functional acceptance
+## Task 10: Rebuild Likes and Profil tabs to reference
+
+**Files:** `lib/app.dart`, `lib/data/mock_data.dart`, `lib/features/likes/likes_screen.dart`, `lib/features/profile/profile_screen.dart`, `test/widget_test.dart`, `test/chat_flow_test.dart`
+
+**Interfaces:**
+- Likes receives deterministic incoming-like fixtures, separate from profiles the user liked.
+- Profil receives editable current-user state and callbacks for profile editing and demo-photo selection.
+- Bottom navigation labels are Temukan, Likes, Chat, Profil and remains visible on both tabs.
+
+- [ ] **Step 1: Write Likes/Profile visual and interaction tests**
+
+Add widget tests for Likes heading/subtitle, a two-column blurred locked-photo grid with age/distance, lock CTA and information sheet; and Profil header, circular photo/camera control, verified Alya 26, city/bio/interests, 80% progress, and Edit profil action. Verify edit/photo choices update local state. Run focused tests and confirm new assertions fail before implementation.
+
+- [ ] **Step 2: Add incoming-like fixtures and editable local profile state**
+
+Create four incoming-like fixtures with distinct ages/distances and photos. Keep them separate from `likedProfileIds`. Store profile edits and selected demo photo in app memory; add `copyWith` only if needed for immutable profile updates.
+
+- [ ] **Step 3: Build reference Likes and Profil screens**
+
+Likes uses a two-column grid; blur photo tiles, overlay a centered lock, and show age/distance at the bottom. Lock/CTA taps open a simple informational sheet without billing. Profil uses a large circular photo with camera action, verified name/age, city, bio, interest chips, 80% progress card, and coral Edit profil button. Edit opens a local form; photo action offers existing demo photos.
+
+- [ ] **Step 4: Verify local edits and navigation**
+
+Run `flutter test test/widget_test.dart test/chat_flow_test.dart` and `flutter analyze`. Expected: both reference screens render, local edit/photo choices update state, and bottom navigation remains persistent.
+
+## Task 11: Run full visual and functional acceptance
 
 **Files:** all app and test files above.
 
@@ -257,7 +283,7 @@ Run `flutter analyze` and `flutter test`. Expected: no analyzer issues and all w
 
 - [ ] **Step 2: Run on an available simulator or device**
 
-Run `flutter devices`, then `flutter run -d <device-id>`. Capture simulator screenshots for Discover and Match, and verify Discover card hierarchy, card count, CTA sizing, match composition, chat header/bubbles/composer, persistent bottom navigation, filters, send behavior, reduced motion, and image fallback.
+Run `flutter devices`, then `flutter run -d <device-id>`. Capture simulator screenshots for Discover, Likes, Profil, Match, and Chat; verify screen hierarchy, all bottom tabs, swipe/filter behavior, profile edit/photo flow, match animation, chat bubbles/composer, keyboard fit, and image fallback.
 
 - [ ] **Step 3: Fix only observed acceptance failures**
 
