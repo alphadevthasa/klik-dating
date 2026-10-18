@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 
 import '../../models/dating_profile.dart';
+import '../../widgets/klik_brand.dart';
 
 class ProfileFilter {
   const ProfileFilter({required this.ageRange, required this.maxDistanceKm});
@@ -15,6 +16,7 @@ class DiscoverScreen extends StatefulWidget {
   const DiscoverScreen({
     super.key,
     required this.profiles,
+    this.onProfile,
     required this.onPass,
     required this.onLike,
     required this.onSuperLike,
@@ -22,6 +24,7 @@ class DiscoverScreen extends StatefulWidget {
   });
 
   final List<DatingProfile> profiles;
+  final VoidCallback? onProfile;
   final ValueChanged<DatingProfile> onPass;
   final ValueChanged<DatingProfile> onLike;
   final ValueChanged<DatingProfile> onSuperLike;
@@ -113,28 +116,39 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
     final profile = _profileIndex < widget.profiles.length
         ? widget.profiles[_profileIndex]
         : null;
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
 
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
         child: Column(
           children: [
-            Row(
-              children: [
-                Text(
-                  'Temukan koneksi',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
-                ),
-                const Spacer(),
-                IconButton(
-                  key: const Key('discover-filter'),
-                  tooltip: 'Atur filter',
-                  onPressed: _showFilter,
-                  icon: const Icon(Icons.tune),
-                ),
-              ],
+            SizedBox(
+              height: 58,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  const KliKBrand(logoSize: 30),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: IconButton(
+                      key: const Key('discover-profile'),
+                      tooltip: 'Buka profil',
+                      onPressed: widget.onProfile,
+                      icon: const Icon(Icons.person_outline),
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: IconButton(
+                      key: const Key('discover-filter'),
+                      tooltip: 'Atur filter',
+                      onPressed: _showFilter,
+                      icon: const Icon(Icons.tune),
+                    ),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 8),
             Expanded(
@@ -143,6 +157,9 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                   : CardSwiper(
                       key: ValueKey(_stackVersion),
                       controller: _controller,
+                      duration: reduceMotion
+                          ? Duration.zero
+                          : const Duration(milliseconds: 240),
                       cardsCount: widget.profiles.length,
                       initialIndex: _profileIndex,
                       numberOfCardsDisplayed: 1,
@@ -157,6 +174,8 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                       cardBuilder: (context, index, horizontal, vertical) =>
                           ProfileCard(
                             profile: widget.profiles[index],
+                            profileNumber: index + 1,
+                            profileCount: widget.profiles.length,
                             onPass: () =>
                                 _controller.swipe(CardSwiperDirection.left),
                             onLike: () =>
@@ -177,12 +196,16 @@ class ProfileCard extends StatelessWidget {
   const ProfileCard({
     super.key,
     required this.profile,
+    required this.profileNumber,
+    required this.profileCount,
     required this.onPass,
     required this.onLike,
     required this.onSuperLike,
   });
 
   final DatingProfile profile;
+  final int profileNumber;
+  final int profileCount;
   final VoidCallback onPass;
   final VoidCallback onLike;
   final VoidCallback onSuperLike;
@@ -197,12 +220,16 @@ class ProfileCard extends StatelessWidget {
           child: Card(
             margin: EdgeInsets.zero,
             clipBehavior: Clip.antiAlias,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24),
+            ),
             child: Stack(
               fit: StackFit.expand,
               children: [
                 Image.network(
                   profile.imageUrl,
                   fit: BoxFit.cover,
+                  semanticLabel: 'Foto ${profile.name}',
                   loadingBuilder: (context, child, progress) => progress == null
                       ? child
                       : const ColoredBox(
@@ -226,7 +253,32 @@ class ProfileCard extends StatelessWidget {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [Colors.transparent, Colors.black87],
-                      stops: [0.45, 1],
+                      stops: [0.38, 1],
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 12,
+                  right: 12,
+                  child: DecoratedBox(
+                    key: const Key('discover-profile-count'),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.94),
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 7,
+                      ),
+                      child: Text(
+                        '$profileNumber / $profileCount',
+                        style: TextStyle(
+                          color: colors.onSurface,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -237,7 +289,7 @@ class ProfileCard extends StatelessWidget {
                   child: DecoratedBox(
                     key: const Key('profile-text-scrim'),
                     decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.7),
+                      color: Colors.black.withValues(alpha: 0.72),
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Padding(
@@ -246,25 +298,87 @@ class ProfileCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(
-                            '${profile.name}, ${profile.age}',
-                            style: Theme.of(context).textTheme.headlineSmall
-                                ?.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w700,
+                          Row(
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  '${profile.name}, ${profile.age}',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: Theme.of(context).textTheme.titleLarge
+                                      ?.copyWith(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w700,
+                                      ),
                                 ),
+                              ),
+                              const SizedBox(width: 5),
+                              Icon(
+                                Icons.verified,
+                                key: const Key('profile-verified-badge'),
+                                color: colors.primary,
+                                size: 19,
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            '${profile.city} · ${profile.distanceKm} km dari kamu',
-                            style: const TextStyle(color: Colors.white),
+                          const SizedBox(height: 3),
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.location_on_outlined,
+                                color: Colors.white,
+                                size: 16,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                profile.city,
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                              Text(
+                                ' · ${profile.distanceKm.round()} km dari kamu',
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 6),
                           Text(
                             profile.bio,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(color: Colors.white),
+                          ),
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 6,
+                            runSpacing: 5,
+                            children: [
+                              for (final interest in profile.interests)
+                                DecoratedBox(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withValues(alpha: 0.16),
+                                    border: Border.all(
+                                      color: Colors.white.withValues(
+                                        alpha: 0.55,
+                                      ),
+                                    ),
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 9,
+                                      vertical: 5,
+                                    ),
+                                    child: Text(
+                                      interest,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
                           ),
                         ],
                       ),
@@ -283,21 +397,33 @@ class ProfileCard extends StatelessWidget {
               key: const Key('discover-pass'),
               tooltip: 'Lewati',
               onPressed: onPass,
-              icon: const Icon(Icons.close),
+              style: IconButton.styleFrom(
+                minimumSize: const Size.square(64),
+                shape: const CircleBorder(),
+              ),
+              icon: const Icon(Icons.close_rounded, size: 28),
             ),
             const SizedBox(width: 20),
             IconButton.filledTonal(
               key: const Key('discover-super-like'),
               tooltip: 'Super like',
               onPressed: onSuperLike,
-              icon: const Icon(Icons.star),
+              style: IconButton.styleFrom(
+                minimumSize: const Size.square(64),
+                shape: const CircleBorder(),
+              ),
+              icon: const Icon(Icons.star_rounded, size: 28),
             ),
             const SizedBox(width: 20),
             IconButton.filled(
               key: const Key('discover-like'),
               tooltip: 'Suka',
               onPressed: onLike,
-              icon: const Icon(Icons.favorite),
+              style: IconButton.styleFrom(
+                minimumSize: const Size.square(72),
+                shape: const CircleBorder(),
+              ),
+              icon: const Icon(Icons.favorite_rounded, size: 30),
             ),
           ],
         ),

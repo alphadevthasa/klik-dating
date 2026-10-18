@@ -64,13 +64,8 @@ class _KliKAppState extends State<KliKApp> {
         useMaterial3: true,
         colorScheme: colorScheme,
         scaffoldBackgroundColor: _cream,
-        appBarTheme: const AppBarTheme(
-          backgroundColor: _cream,
-          foregroundColor: _navy,
-          centerTitle: true,
-          elevation: 0,
-        ),
         navigationBarTheme: NavigationBarThemeData(
+          height: 72,
           backgroundColor: Colors.white,
           indicatorColor: _blush,
           labelTextStyle: const WidgetStatePropertyAll(
@@ -80,12 +75,12 @@ class _KliKAppState extends State<KliKApp> {
       ),
       home: Builder(
         builder: (navigatorContext) => Scaffold(
-          appBar: AppBar(title: const Text('KLiK')),
           body: IndexedStack(
             index: activeTabIndex,
             children: [
               DiscoverScreen(
                 profiles: discoverProfiles,
+                onProfile: () => setState(() => activeTabIndex = 3),
                 onPass: (_) {},
                 onLike: (profile) => _recordLike(navigatorContext, profile),
                 onSuperLike: (profile) =>

@@ -9,11 +9,63 @@ import 'package:klik/features/discover/discover_screen.dart';
 import 'package:klik/models/dating_profile.dart';
 
 void main() {
+  testWidgets('first profile matches reference content and card controls', (
+    tester,
+  ) async {
+    await tester.pumpWidget(const KliKApp());
+
+    expect(find.text('Nadia, 27'), findsOneWidget);
+    expect(find.text('Bandung'), findsOneWidget);
+    expect(find.byKey(const Key('discover-profile-count')), findsOneWidget);
+    expect(find.text('1 / 5'), findsOneWidget);
+    expect(find.byKey(const Key('profile-verified-badge')), findsOneWidget);
+    for (final interest in ['Coffee', 'Books', 'Travel', 'Sunset']) {
+      expect(find.text(interest), findsOneWidget);
+    }
+    for (final key in [
+      'discover-pass',
+      'discover-super-like',
+      'discover-like',
+    ]) {
+      expect(
+        tester.getSize(find.byKey(Key(key))).width,
+        greaterThanOrEqualTo(60),
+      );
+    }
+    expect(find.byType(NavigationBar), findsOneWidget);
+  });
+
+  testWidgets('reduced motion removes CardSwiper swipe animation', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(disableAnimations: true),
+          child: Scaffold(
+            body: DiscoverScreen(
+              profiles: mockProfiles,
+              onPass: (_) {},
+              onLike: (_) {},
+              onSuperLike: (_) {},
+              onFilter: (_) {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      tester.widget<CardSwiper>(find.byType(CardSwiper)).duration,
+      Duration.zero,
+    );
+  });
+
   testWidgets('pass button advances to the next profile', (tester) async {
     await tester.pumpWidget(const KliKApp());
 
     expect(find.byType(CardSwiper), findsOneWidget);
-    expect(find.text('Salsabila, 22'), findsOneWidget);
+    expect(find.text('Nadia, 27'), findsOneWidget);
     await tester.tap(find.byKey(const Key('discover-pass')));
     await tester.pumpAndSettle();
 
@@ -23,14 +75,16 @@ void main() {
   testWidgets('swiping right records a like and advances', (tester) async {
     await tester.pumpWidget(const KliKApp());
 
-    await tester.drag(find.text('Salsabila, 22'), const Offset(300, 0));
+    await tester.tap(find.byKey(const Key('discover-pass')));
+    await tester.pumpAndSettle();
+    await tester.drag(find.text('Nabila, 25'), const Offset(300, 0));
     await tester.pumpAndSettle();
 
-    expect(find.text('Nabila, 25'), findsOneWidget);
+    expect(find.text('Kirana, 29'), findsOneWidget);
     final dynamic appState = tester.state<State<StatefulWidget>>(
       find.byType(KliKApp),
     );
-    expect(appState.likedProfileIds, contains('profile-1'));
+    expect(appState.likedProfileIds, contains('profile-2'));
   });
 
   testWidgets('swiping left passes the current profile', (tester) async {
@@ -42,7 +96,7 @@ void main() {
       onSuperLike: (_) {},
     );
 
-    await tester.drag(find.text('Salsabila, 22'), const Offset(-300, 0));
+    await tester.drag(find.text('Nadia, 27'), const Offset(-300, 0));
     await tester.pumpAndSettle();
 
     expect(passedProfiles.map((profile) => profile.id), ['profile-1']);
@@ -74,7 +128,7 @@ void main() {
       onSuperLike: superLikedProfiles.add,
     );
 
-    await tester.drag(find.text('Salsabila, 22'), const Offset(0, -300));
+    await tester.drag(find.text('Nadia, 27'), const Offset(0, -300));
     await tester.pumpAndSettle();
 
     expect(superLikedProfiles.map((profile) => profile.id), ['profile-1']);
@@ -86,7 +140,7 @@ void main() {
   ) async {
     await tester.pumpWidget(const KliKApp());
 
-    final titleFinder = find.text('Salsabila, 22');
+    final titleFinder = find.text('Nadia, 27');
     final title = tester.widget<Text>(titleFinder);
     final foreground = title.style!.color!;
     final card = tester.getRect(
@@ -188,7 +242,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Alya, 27'), findsOneWidget);
-    expect(find.text('Salsabila, 22'), findsNothing);
+    expect(find.text('Nadia, 27'), findsNothing);
     expect(find.text('Nabila, 25'), findsNothing);
     expect(find.text('Kirana, 29'), findsNothing);
   });
@@ -196,7 +250,7 @@ void main() {
   testWidgets('exhausted profiles can be restarted', (tester) async {
     await tester.pumpWidget(const KliKApp());
 
-    for (var index = 0; index < 4; index++) {
+    for (var index = 0; index < mockProfiles.length; index++) {
       await tester.tap(find.byKey(const Key('discover-pass')));
       await tester.pumpAndSettle();
     }
@@ -205,7 +259,7 @@ void main() {
     await tester.tap(find.text('Mulai lagi'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Salsabila, 22'), findsOneWidget);
+    expect(find.text('Nadia, 27'), findsOneWidget);
   });
 
   testWidgets('restart clears filters and restores all profiles', (
@@ -229,7 +283,13 @@ void main() {
     await tester.tap(find.text('Mulai lagi'));
     await tester.pumpAndSettle();
 
-    final names = ['Salsabila, 22', 'Nabila, 25', 'Kirana, 29', 'Alya, 27'];
+    final names = [
+      'Nadia, 27',
+      'Nabila, 25',
+      'Kirana, 29',
+      'Alya, 27',
+      'Dinda, 32',
+    ];
     for (var index = 0; index < names.length; index++) {
       expect(find.text(names[index]), findsOneWidget);
       if (index < names.length - 1) {
