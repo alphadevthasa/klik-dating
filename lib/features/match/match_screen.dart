@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 
 import '../../models/dating_profile.dart';
+import '../../widgets/klik_brand.dart';
 
 class MatchScreen extends StatelessWidget {
   const MatchScreen({
@@ -30,6 +31,7 @@ class MatchScreen extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(24, 16, 24, 20),
             child: Column(
               children: [
+                const KliKBrand(logoSize: 30),
                 Expanded(
                   child: Center(
                     child: AspectRatio(

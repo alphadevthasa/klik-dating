@@ -5,6 +5,7 @@ import 'package:klik/data/mock_data.dart';
 import 'package:klik/features/match/match_screen.dart';
 import 'package:lottie/lottie.dart';
 
+const _navy = Color(0xFF202B3D);
 const _matchCopy = 'Mulai obrolan dan kenali satu sama lain lebih dekat.';
 
 void main() {
@@ -17,6 +18,19 @@ void main() {
     await tester.tap(find.byKey(const Key('discover-like')));
     await tester.pumpAndSettle();
 
+    expect(find.text('KLiK'), findsOneWidget);
+    expect(find.text('Temukan koneksi yang klik'), findsOneWidget);
+    expect(tester.widget<Text>(find.text('KLiK')).style?.color, _navy);
+    expect(
+      tester.widget<Icon>(find.byKey(const Key('klik-brand-heart'))).color,
+      _navy,
+    );
+    expect(
+      tester.getRect(find.text('Temukan koneksi yang klik')).bottom,
+      lessThanOrEqualTo(
+        tester.getRect(find.byKey(const Key('match-animation'))).top,
+      ),
+    );
     expect(find.text('Kalian cocok!'), findsOneWidget);
     expect(find.text(_matchCopy), findsOneWidget);
     expect(find.byKey(const Key('match-animation')), findsOneWidget);

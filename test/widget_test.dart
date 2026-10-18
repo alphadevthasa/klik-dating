@@ -2,11 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:klik/app.dart';
 
+const _navy = Color(0xFF202B3D);
+const _coral = Color(0xFFC5485B);
+
 void usePhoneViewport(WidgetTester tester) {
   tester.view.devicePixelRatio = 1;
   tester.view.physicalSize = const Size(390, 844);
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
+}
+
+void _expectBrandColor(WidgetTester tester, Color color) {
+  expect(tester.widget<Text>(find.text('KLiK')).style?.color, color);
+  expect(
+    tester.widget<Icon>(find.byKey(const Key('klik-brand-heart'))).color,
+    color,
+  );
 }
 
 void main() {
@@ -16,7 +27,7 @@ void main() {
     await tester.pumpWidget(const KliKApp());
 
     expect(find.text('KLiK'), findsOneWidget);
-    expect(find.text('Temukan koneksi yang sefrekuensi'), findsOneWidget);
+    expect(find.text('Temukan koneksi yang klik'), findsOneWidget);
     expect(find.byKey(const Key('klik-brand-heart')), findsOneWidget);
     expect(find.text('Temukan'), findsOneWidget);
     expect(find.text('Likes'), findsOneWidget);
@@ -29,6 +40,12 @@ void main() {
     expect(find.text('Alya, 26'), findsOneWidget);
     expect(find.text('Jakarta'), findsOneWidget);
     expect(find.byType(NavigationBar), findsOneWidget);
+  });
+
+  testWidgets('Discover brand wordmark uses deep navy', (tester) async {
+    await tester.pumpWidget(const KliKApp());
+
+    _expectBrandColor(tester, _navy);
   });
 
   testWidgets('Discover layout fits a 390x844 viewport', (tester) async {
@@ -51,6 +68,7 @@ void main() {
       await tester.tap(find.text('Likes'));
       await tester.pumpAndSettle();
 
+      _expectBrandColor(tester, _coral);
       expect(find.byKey(const Key('likes-heading')), findsOneWidget);
       expect(find.byTooltip('Atur filter'), findsOneWidget);
       expect(find.text('Orang yang tertarik denganmu'), findsOneWidget);
@@ -105,6 +123,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('KLiK'), findsOneWidget);
+      _expectBrandColor(tester, _coral);
       expect(find.byTooltip('Filter profil'), findsOneWidget);
       expect(find.byTooltip('Notifikasi profil'), findsOneWidget);
       expect(find.byKey(const Key('profile-photo-clip')), findsOneWidget);

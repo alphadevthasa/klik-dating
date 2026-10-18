@@ -17,7 +17,7 @@ class KliKBrand extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    final brandColor = color ?? colors.primary;
+    final brandColor = color ?? const Color(0xFF202B3D);
     final resolvedAlignment = alignment.resolve(Directionality.of(context));
 
     return Align(
@@ -56,7 +56,7 @@ class KliKBrand extends StatelessWidget {
           if (showTagline) ...[
             const SizedBox(height: 3),
             Text(
-              'Temukan koneksi yang sefrekuensi',
+              'Temukan koneksi yang klik',
               style: TextStyle(
                 color: colors.onSurface,
                 fontSize: 11,
