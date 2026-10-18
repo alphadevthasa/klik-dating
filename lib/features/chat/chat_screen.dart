@@ -40,15 +40,21 @@ class _ChatScreenState extends State<ChatScreen> {
     final text = _composerController.text.trim();
     if (text.isEmpty) return;
 
+    final disableAnimations = MediaQuery.disableAnimationsOf(context);
     widget.onSendMessage(profileId, text);
     _composerController.clear();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || !_messagesController.hasClients) return;
-      _messagesController.animateTo(
-        _messagesController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 180),
-        curve: Curves.easeOut,
-      );
+      const latestOffset = 0.0;
+      if (disableAnimations) {
+        _messagesController.jumpTo(latestOffset);
+      } else {
+        _messagesController.animateTo(
+          latestOffset,
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOut,
+        );
+      }
     });
   }
 
@@ -301,12 +307,13 @@ class _ChatScreenState extends State<ChatScreen> {
               ? const Center(child: Text('Mulai percakapanmu di sini.'))
               : ListView.builder(
                   controller: _messagesController,
+                  reverse: true,
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
                   itemCount: messages.length + 1,
-                  itemBuilder: (context, index) => index == 0
+                  itemBuilder: (context, index) => index == messages.length
                       ? const _DateSeparator()
                       : _MessageBubble(
-                          message: messages[index - 1],
+                          message: messages[messages.length - index - 1],
                           profile: selectedProfile,
                         ),
                 ),

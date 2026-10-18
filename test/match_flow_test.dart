@@ -61,7 +61,7 @@ void main() {
 
     expect(find.byKey(const Key('chat-composer')), findsOneWidget);
     expect(find.text('Nadia'), findsOneWidget);
-    expect(find.text('Hai! Senang bisa kenalan 😊'), findsOneWidget);
+    expect(find.text('Wah, kapan-kapan ngopi bareng yuk!'), findsOneWidget);
     expect(find.byType(NavigationBar), findsOneWidget);
   });
 

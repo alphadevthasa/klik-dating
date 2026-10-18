@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:klik/app.dart';
 import 'package:klik/data/mock_data.dart';
+import 'package:klik/features/chat/chat_screen.dart';
+import 'package:klik/models/chat_message.dart';
 
 void main() {
   testWidgets('chat sends non-empty messages and ignores empty sends', (
@@ -60,6 +62,107 @@ void main() {
     );
   });
 
+  testWidgets('send auto-scroll jumps immediately with reduced motion', (
+    tester,
+  ) async {
+    final messages = [
+      for (var index = 0; index < 20; index++)
+        ChatMessage(
+          text: 'Older message $index',
+          isMine: index.isOdd,
+          timeLabel: '08:${index.toString().padLeft(2, '0')}',
+        ),
+      ...mockMessagesByProfile['profile-1']!,
+    ];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(disableAnimations: true),
+          child: Scaffold(
+            body: StatefulBuilder(
+              builder: (context, setState) => ChatScreen(
+                profiles: mockProfiles,
+                conversationId: 'profile-1',
+                messagesByProfile: {'profile-1': messages},
+                onOpenConversation: (_) {},
+                onBack: () {},
+                onSendMessage: (profileId, text) => setState(
+                  () => messages.add(
+                    ChatMessage(
+                      text: text,
+                      isMine: true,
+                      timeLabel: 'Sekarang',
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            bottomNavigationBar: NavigationBar(
+              selectedIndex: 2,
+              onDestinationSelected: (_) {},
+              destinations: const [
+                NavigationDestination(
+                  icon: Icon(Icons.explore_outlined),
+                  label: 'Temukan',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.favorite_border),
+                  label: 'Likes',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.chat_bubble_outline),
+                  label: 'Chat',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.person_outline),
+                  label: 'Profil',
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final latest = find.text('Wah, kapan-kapan ngopi bareng yuk!');
+    expect(latest, findsOneWidget);
+    final latestRect = tester.getRect(latest);
+    final initialListRect = tester.getRect(find.byType(ListView));
+    expect(latestRect.top, greaterThanOrEqualTo(initialListRect.top));
+    expect(latestRect.bottom, lessThanOrEqualTo(initialListRect.bottom));
+
+    final scrollable = find.descendant(
+      of: find.byType(ListView),
+      matching: find.byType(Scrollable),
+    );
+    final position = tester.state<ScrollableState>(scrollable).position;
+    position.jumpTo(position.maxScrollExtent);
+    await tester.pumpAndSettle();
+    expect(find.text('Older message 0'), findsOneWidget);
+    expect(
+      MediaQuery.disableAnimationsOf(
+        tester.element(find.byKey(const Key('chat-composer'))),
+      ),
+      isTrue,
+    );
+
+    await tester.enterText(
+      find.byKey(const Key('chat-composer')),
+      'Reduced-motion message',
+    );
+    await tester.tap(find.byKey(const Key('chat-send')));
+    await tester.pump(const Duration(milliseconds: 1));
+    await tester.pump();
+
+    final sent = find.text('Reduced-motion message');
+    expect(sent, findsOneWidget);
+    final sentRect = tester.getRect(sent);
+    final listRect = tester.getRect(find.byType(ListView));
+    expect(sentRect.top, greaterThanOrEqualTo(listRect.top));
+    expect(sentRect.bottom, lessThanOrEqualTo(listRect.bottom));
+  });
+
   testWidgets('conversation back returns to list and tab navigation works', (
     tester,
   ) async {
@@ -106,15 +209,22 @@ void main() {
     expect(find.text('Nadia'), findsOneWidget);
     expect(find.text(', 27'), findsOneWidget);
     expect(find.text('Online'), findsOneWidget);
+    expect(find.text('Wah, kapan-kapan ngopi bareng yuk!'), findsOneWidget);
+    expect(find.text('09:17'), findsOneWidget);
+    final latestMessageRect = tester.getRect(
+      find.text('Wah, kapan-kapan ngopi bareng yuk!'),
+    );
+    final listRect = tester.getRect(find.byType(ListView));
+    expect(latestMessageRect.top, greaterThanOrEqualTo(listRect.top));
+    expect(latestMessageRect.bottom, lessThanOrEqualTo(listRect.bottom));
+
+    await tester.drag(find.byType(ListView), const Offset(0, 500));
+    await tester.pumpAndSettle();
     expect(find.text('Hari ini'), findsOneWidget);
     expect(find.text('Hai! Senang bisa kenalan 😊'), findsOneWidget);
     expect(find.text('Hai Nadia! Aku juga senang 😊'), findsOneWidget);
     expect(find.text('09:12'), findsOneWidget);
     expect(find.text('09:13'), findsOneWidget);
-    await tester.drag(find.byType(ListView), const Offset(0, -500));
-    await tester.pumpAndSettle();
-    expect(find.text('09:16'), findsOneWidget);
-    expect(find.text('09:17'), findsOneWidget);
     expect(find.byTooltip('Panggil Nadia'), findsOneWidget);
     expect(find.byTooltip('Opsi chat'), findsOneWidget);
     expect(find.byTooltip('Tambahkan lampiran'), findsOneWidget);
