@@ -319,14 +319,16 @@ Run `flutter test test/widget_test.dart test/match_flow_test.dart` and `flutter 
 
 **Files:** all app and test files above.
 
-- [ ] **Step 1: Run full static and widget checks**
+- [x] **Step 1: Run full static and widget checks**
 
 Run `flutter analyze` and `flutter test`. Expected: no analyzer issues and all widget tests pass.
 
-- [ ] **Step 2: Run on an available simulator or device**
+- [x] **Step 2: Run on an available simulator or device**
 
 Run `flutter devices`, then `flutter run -d <device-id>`. Capture simulator screenshots for Discover, Likes, Profil, Match, and Chat; verify screen hierarchy, all bottom tabs, swipe/filter behavior, profile edit/photo flow, match animation, chat bubbles/composer, keyboard fit, and image fallback.
 
-- [ ] **Step 3: Fix only observed acceptance failures**
+**Emoji verification:** Chat emojis render correctly on the Android emulator. The installed iOS 26.3 simulator runtime renders all app emojis as question-mark boxes; Flutter confirms this is an Apple simulator runtime issue resolved in iOS 26.4, not an app font issue.
+
+- [x] **Step 3: Fix only observed acceptance failures**
 
 For each issue found, add or update the smallest relevant widget test, fix the behavior, and rerun the affected test plus `flutter analyze`.
