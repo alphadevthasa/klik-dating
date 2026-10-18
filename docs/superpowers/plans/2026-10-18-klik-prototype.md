@@ -6,11 +6,11 @@
 
 **Architecture:** A small stateful app shell owns session-only profile, like, filter, tab, and chat state. Focused screens receive data and callbacks; Flutter navigation opens match and conversation views. Local fixtures keep all behavior deterministic without a backend.
 
-**Tech Stack:** Flutter/Dart, Material widgets, `lottie`, `flutter_test`.
+**Tech Stack:** Flutter/Dart, Material widgets, `flutter_card_swiper`, `lottie`, `flutter_test`.
 
 ## Global Constraints
 
-- Use Flutter Material widgets as the foundation; add `lottie` for one bundled match animation.
+- Use Flutter Material widgets as the foundation, `flutter_card_swiper` for the Discover stack, and `lottie` for one bundled match animation.
 - Keep local sample data and UI state in memory; app restart resets state.
 - Use Indonesian UI copy and the approved cream/blush, coral-pink, and deep-navy palette.
 - Include Discover, Like, Chat, and Profil tabs; match and conversation views open above the tab shell.
@@ -21,13 +21,13 @@
 
 ## File map
 
-- `pubspec.yaml` — Flutter package metadata, `lottie` dependency, and animation asset declaration.
+- `pubspec.yaml` — Flutter package metadata, `flutter_card_swiper` and `lottie` dependencies, and animation asset declaration.
 - `lib/main.dart` — app entry point.
 - `lib/app.dart` — theme, bottom-tab shell, shared local session state, and navigation callbacks.
 - `lib/models/dating_profile.dart` — profile fixture shape.
 - `lib/models/chat_message.dart` — local message shape.
 - `lib/data/mock_data.dart` — deterministic sample profiles and conversations.
-- `lib/features/discover/discover_screen.dart` — swipeable profile card, actions, and filter sheet.
+- `lib/features/discover/discover_screen.dart` — `CardSwiper` profile stack, action buttons, and filter sheet.
 - `lib/features/likes/likes_screen.dart` — liked-profile list and conversation shortcut.
 - `lib/features/chat/chat_screen.dart` — conversation list, conversation view, and message composer.
 - `lib/features/profile/profile_screen.dart` — current demo profile.
@@ -77,7 +77,7 @@ Run `flutter test test/widget_test.dart` and `flutter analyze`. Expected: test p
 **Interfaces:**
 - `DiscoverScreen({required List<DatingProfile> profiles, required ValueChanged<DatingProfile> onPass, required ValueChanged<DatingProfile> onLike, required ValueChanged<DatingProfile> onSuperLike, required ValueChanged<ProfileFilter> onFilter})`.
 - `ProfileFilter({required RangeValues ageRange, required double maxDistanceKm})`: returned by the filter bottom sheet.
-- `ProfileCard`: displays one profile and emits pass/like decisions from horizontal drag or action buttons.
+- `ProfileCard`: displays one profile inside the `CardSwiper` stack; swipe outcomes are handled by the parent screen.
 
 - [ ] **Step 1: Write Discover behavior tests**
 
@@ -145,7 +145,32 @@ Use `Lottie.asset('assets/animations/match.json', repeat: false)` with profile p
 
 Run `flutter test test/match_flow_test.dart` and `flutter analyze`. Expected: Lottie loads from the bundled asset, the match fixture routes to Match, and its message action opens the right conversation.
 
-## Task 5: Run full acceptance checks
+## Task 5: Adopt flutter_card_swiper for Discover
+
+**Files:** `pubspec.yaml`, `lib/features/discover/discover_screen.dart`, `test/discover_flow_test.dart`
+
+**Interfaces:**
+- `CardSwiperController` drives the existing pass / super-like / like buttons.
+- `CardSwiper.onSwipe(previousIndex, currentIndex, direction)` maps left to pass, right to like, and up to super-like.
+- Configure `isLoop: false`; after the last card, `onEnd` reveals the existing empty state.
+
+- [ ] **Step 1: Add the package**
+
+Run `flutter pub add flutter_card_swiper` in the project worktree. The package supports controller-triggered swipes and configurable left/right/up directions.
+
+- [ ] **Step 2: Add package-backed Discover tests**
+
+Update `test/discover_flow_test.dart` to assert that `CardSwiper` is used, left/right drags still pass/like the correct fixture, the star action triggers super-like, and exhausting the non-looping stack shows the empty state. Run `flutter test test/discover_flow_test.dart`; the `CardSwiper` assertion must fail before production changes.
+
+- [ ] **Step 3: Replace custom drag handling with CardSwiper**
+
+Create and dispose one `CardSwiperController` in `DiscoverScreen`. Render profile content through `CardSwiper.cardBuilder`; use the package `onSwipe` callback for left/pass, right/like, and up/super-like. Route the existing X/star/heart controls through `controller.swipe(...)`. Set `isLoop: false` and allow only left, right, and up directions. Keep filter changes resetting the stack index.
+
+- [ ] **Step 4: Verify package-backed swipe behavior**
+
+Run `flutter test test/discover_flow_test.dart` and `flutter analyze`. Expected: button and gesture outcomes agree, the package stack ends, and existing profile/filter behavior remains intact.
+
+## Task 6: Run full acceptance checks
 
 **Files:** all app and test files above.
 

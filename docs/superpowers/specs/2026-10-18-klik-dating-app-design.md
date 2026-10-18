@@ -10,7 +10,7 @@ Build an interactive Flutter dating-app prototype inspired by the supplied KLiK 
 - Indonesian-language consumer mobile app.
 - Warm cream and blush surfaces, coral-pink actions, and deep navy text, following the reference.
 - Profile photography anchors the Discover screen; generous rounded shapes and restrained motion keep the UI warm and readable.
-- Flutter Material widgets provide the foundation. Add `lottie` for the bundled match animation; avoid a state-management or UI-kit dependency for this local prototype.
+- Flutter Material widgets provide the foundation. Use `flutter_card_swiper` for the animated Discover stack and `lottie` for the bundled match animation; avoid a state-management or UI-kit dependency for this local prototype.
 
 ## Screens and navigation
 
@@ -39,7 +39,7 @@ Keep the small prototype state in the app shell: active tab, current profile ind
 ## Motion and accessibility
 
 - Bundle one license-compatible Lottie JSON animation for match celebration and render it through `lottie`.
-- Use Flutter-native transitions for profile swipe feedback and screen changes; avoid unrelated perpetual animation.
+- Use `flutter_card_swiper` for profile-card swipe feedback and Flutter-native transitions for screen changes; avoid unrelated perpetual animation.
 - Respect reduced-motion settings by keeping navigation and content usable without decorative motion.
 - Keep touch targets clear, provide semantic labels for icon-only actions, and maintain readable contrast over profile photos using a scrim.
 
