@@ -77,63 +77,67 @@ class _KliKAppState extends State<KliKApp> {
           ),
         ),
       ),
-      home: Scaffold(
-        appBar: AppBar(title: const Text('KLiK')),
-        body: IndexedStack(
-          index: activeTabIndex,
-          children: [
-            DiscoverScreen(
-              profiles: discoverProfiles,
-              onPass: (_) {},
-              onLike: _recordLike,
-              onSuperLike: _recordLike,
-              onFilter: (filter) => setState(() => profileFilter = filter),
-            ),
-            LikesScreen(
-              profiles: mockProfiles
-                  .where((profile) => likedProfileIds.contains(profile.id))
-                  .toList(),
-              onOpenConversation: _openConversation,
-            ),
-            ChatScreen(
-              profiles: mockProfiles,
-              conversationId: selectedConversationId,
-              messagesByProfile: messagesByProfile,
-              onOpenConversation: _openConversation,
-              onBack: _closeConversation,
-              onSendMessage: _sendMessage,
-            ),
-            ProfileScreen(profile: mockProfiles.first),
-          ],
-        ),
-        bottomNavigationBar: NavigationBar(
-          selectedIndex: activeTabIndex,
-          labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-          onDestinationSelected: (index) => setState(() {
-            activeTabIndex = index;
-          }),
-          destinations: const [
-            NavigationDestination(
-              icon: Icon(Icons.explore_outlined),
-              selectedIcon: Icon(Icons.explore),
-              label: 'Discover',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.favorite_border),
-              selectedIcon: Icon(Icons.favorite),
-              label: 'Like',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.chat_bubble_outline),
-              selectedIcon: Icon(Icons.chat_bubble),
-              label: 'Chat',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.person_outline),
-              selectedIcon: Icon(Icons.person),
-              label: 'Profil',
-            ),
-          ],
+      home: Builder(
+        builder: (navigatorContext) => Scaffold(
+          appBar: AppBar(title: const Text('KLiK')),
+          body: IndexedStack(
+            index: activeTabIndex,
+            children: [
+              DiscoverScreen(
+                profiles: discoverProfiles,
+                onPass: (_) {},
+                onLike: _recordLike,
+                onSuperLike: _recordLike,
+                onFilter: (filter) => setState(() => profileFilter = filter),
+              ),
+              LikesScreen(
+                profiles: mockProfiles
+                    .where((profile) => likedProfileIds.contains(profile.id))
+                    .toList(),
+                onOpenConversation: (profileId) =>
+                    _openConversation(navigatorContext, profileId),
+              ),
+              ChatScreen(
+                profiles: mockProfiles,
+                conversationId: null,
+                messagesByProfile: messagesByProfile,
+                onOpenConversation: (profileId) =>
+                    _openConversation(navigatorContext, profileId),
+                onBack: () {},
+                onSendMessage: _sendMessage,
+              ),
+              ProfileScreen(profile: mockCurrentProfile),
+            ],
+          ),
+          bottomNavigationBar: NavigationBar(
+            selectedIndex: activeTabIndex,
+            labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+            onDestinationSelected: (index) => setState(() {
+              activeTabIndex = index;
+            }),
+            destinations: const [
+              NavigationDestination(
+                icon: Icon(Icons.explore_outlined),
+                selectedIcon: Icon(Icons.explore),
+                label: 'Discover',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.favorite_border),
+                selectedIcon: Icon(Icons.favorite),
+                label: 'Like',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.chat_bubble_outline),
+                selectedIcon: Icon(Icons.chat_bubble),
+                label: 'Chat',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.person_outline),
+                selectedIcon: Icon(Icons.person),
+                label: 'Profil',
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -143,15 +147,31 @@ class _KliKAppState extends State<KliKApp> {
     setState(() => likedProfileIds.add(profile.id));
   }
 
-  void _openConversation(String profileId) {
+  void _openConversation(BuildContext navigatorContext, String profileId) {
     setState(() {
       selectedConversationId = profileId;
       activeTabIndex = 2;
     });
-  }
 
-  void _closeConversation() {
-    setState(() => selectedConversationId = null);
+    Navigator.of(navigatorContext)
+        .push<void>(
+          MaterialPageRoute<void>(
+            builder: (routeContext) => Scaffold(
+              body: ChatScreen(
+                profiles: mockProfiles,
+                conversationId: selectedConversationId,
+                messagesByProfile: messagesByProfile,
+                onOpenConversation: (nextProfileId) =>
+                    _openConversation(routeContext, nextProfileId),
+                onBack: () => Navigator.of(routeContext).pop(),
+                onSendMessage: _sendMessage,
+              ),
+            ),
+          ),
+        )
+        .whenComplete(() {
+          if (mounted) setState(() => selectedConversationId = null);
+        });
   }
 
   void _sendMessage(String profileId, String text) {

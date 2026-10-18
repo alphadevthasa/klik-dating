@@ -1,6 +1,19 @@
 import '../models/chat_message.dart';
 import '../models/dating_profile.dart';
 
+const mockCurrentProfile = DatingProfile(
+  id: 'current-profile',
+  name: 'Nadia',
+  age: 24,
+  city: 'Bandung',
+  bio: 'Pencinta kopi, musik, dan cerita baru.',
+  imageUrl:
+      'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=900',
+  distanceKm: 0,
+  interests: ['Kopi', 'Musik', 'Membaca'],
+  mutualMatch: false,
+);
+
 const mockProfiles = <DatingProfile>[
   DatingProfile(
     id: 'profile-1',

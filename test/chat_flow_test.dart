@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:klik/app.dart';
+import 'package:klik/data/mock_data.dart';
 
 void main() {
   testWidgets('chat sends non-empty messages and ignores empty sends', (
@@ -52,8 +53,49 @@ void main() {
 
     await tester.tap(find.text('Profil'));
     await tester.pumpAndSettle();
-    expect(find.text('Pencinta kopi, buku, dan jalan sore.'), findsOneWidget);
+    expect(find.text('Pencinta kopi, musik, dan cerita baru.'), findsOneWidget);
   });
+
+  testWidgets('conversation detail hides shell and back restores it', (
+    tester,
+  ) async {
+    await tester.pumpWidget(const KliKApp());
+    await tester.tap(find.text('Chat'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Nabila, 25'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(NavigationBar), findsNothing);
+    expect(find.text('KLiK'), findsNothing);
+
+    await tester.tap(find.byTooltip('Kembali ke daftar chat'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(NavigationBar), findsOneWidget);
+    expect(find.text('KLiK'), findsOneWidget);
+    expect(find.text('Percakapan'), findsOneWidget);
+  });
+
+  testWidgets(
+    'Profil uses a demo self-profile distinct from Discover profiles',
+    (tester) async {
+      expect(
+        mockProfiles.map((profile) => profile.name),
+        isNot(contains('Nadia')),
+      );
+      expect(
+        mockProfiles.map((profile) => profile.id),
+        isNot(contains(mockCurrentProfile.id)),
+      );
+
+      await tester.pumpWidget(const KliKApp());
+      await tester.tap(find.text('Profil'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Nadia, 24'), findsOneWidget);
+      expect(find.text('Salsabila, 22'), findsNothing);
+    },
+  );
 
   testWidgets('liked profiles open a conversation and Like has empty state', (
     tester,
