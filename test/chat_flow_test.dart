@@ -80,7 +80,7 @@ void main() {
     expect(find.text('Pencinta kopi, musik, dan cerita baru.'), findsOneWidget);
   });
 
-  testWidgets('conversation detail hides shell and back restores it', (
+  testWidgets('conversation detail keeps tabs visible and back restores list', (
     tester,
   ) async {
     await tester.pumpWidget(const KliKApp());
@@ -89,57 +89,55 @@ void main() {
     await tester.tap(find.text('Nabila, 25'));
     await tester.pumpAndSettle();
 
-    expect(find.byType(NavigationBar), findsNothing);
+    expect(find.byType(NavigationBar), findsOneWidget);
     expect(find.text('KLiK'), findsNothing);
 
     await tester.tap(find.byTooltip('Kembali ke daftar chat'));
     await tester.pumpAndSettle();
 
     expect(find.byType(NavigationBar), findsOneWidget);
-    expect(find.text('KLiK'), findsOneWidget);
+    expect(find.text('KLiK'), findsNothing);
     expect(find.text('Percakapan'), findsOneWidget);
   });
 
-  testWidgets(
-    'Profil uses a demo self-profile distinct from Discover profiles',
-    (tester) async {
-      expect(
-        mockProfiles.map((profile) => profile.name),
-        isNot(contains('Nadia')),
-      );
-      expect(
-        mockProfiles.map((profile) => profile.id),
-        isNot(contains(mockCurrentProfile.id)),
-      );
+  testWidgets('Profil shows the current Alya demo profile', (tester) async {
+    expect(
+      mockProfiles.map((profile) => profile.id),
+      isNot(contains(mockCurrentProfile.id)),
+    );
+    expect(mockCurrentProfile.name, 'Alya');
+    expect(mockCurrentProfile.age, 26);
+    expect(mockCurrentProfile.city, 'Jakarta');
 
-      await tester.pumpWidget(const KliKApp());
-      await tester.tap(find.text('Profil'));
-      await tester.pumpAndSettle();
+    await tester.pumpWidget(const KliKApp());
+    await tester.tap(find.text('Profil'));
+    await tester.pumpAndSettle();
 
-      expect(find.text('Nadia, 24'), findsOneWidget);
-      expect(find.text('Salsabila, 22'), findsNothing);
-    },
-  );
+    expect(find.text('Alya, 26'), findsOneWidget);
+    expect(find.text('Jakarta'), findsOneWidget);
+  });
 
   testWidgets('liked profiles open a conversation and Like has empty state', (
     tester,
   ) async {
     await tester.pumpWidget(const KliKApp());
-    await tester.tap(find.text('Like'));
+    await tester.tap(find.text('Likes'));
     await tester.pumpAndSettle();
     expect(find.text('Belum ada profil yang kamu sukai.'), findsOneWidget);
 
-    await tester.tap(find.text('Discover'));
+    await tester.tap(find.text('Temukan'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('discover-pass')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('discover-like')));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Like'));
+    await tester.tap(find.text('Likes'));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Salsabila, 22'));
+    await tester.tap(find.text('Nabila, 25'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Salsabila'), findsOneWidget);
+    expect(find.text('Nabila'), findsOneWidget);
     expect(find.byTooltip('Kirim pesan'), findsOneWidget);
   });
 }

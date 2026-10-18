@@ -7,6 +7,7 @@ import 'package:klik/app.dart';
 import 'package:klik/data/mock_data.dart';
 import 'package:klik/features/discover/discover_screen.dart';
 import 'package:klik/models/dating_profile.dart';
+import 'package:lottie/lottie.dart';
 
 void main() {
   testWidgets('first profile matches reference content and card controls', (
@@ -59,6 +60,55 @@ void main() {
       tester.widget<CardSwiper>(find.byType(CardSwiper)).duration,
       Duration.zero,
     );
+  });
+
+  testWidgets('non-match right swipe plays the local like burst', (
+    tester,
+  ) async {
+    await _pumpDiscover(
+      tester,
+      profiles: mockProfiles.skip(1).toList(),
+      onPass: (_) {},
+      onLike: (_) {},
+      onSuperLike: (_) {},
+    );
+
+    await tester.drag(find.text('Nabila, 25'), const Offset(300, 0));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump();
+
+    expect(find.byKey(const Key('like-feedback')), findsOneWidget);
+    final animation = find.byKey(const Key('like-animation'));
+    expect(animation, findsOneWidget);
+    expect(tester.widget(animation), isA<LottieBuilder>());
+  });
+
+  testWidgets('reduced motion shows static heart instead of Lottie', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(disableAnimations: true),
+          child: Scaffold(
+            body: DiscoverScreen(
+              profiles: [mockProfiles[1]],
+              onPass: (_) {},
+              onLike: (_) {},
+              onSuperLike: (_) {},
+              onFilter: (_) {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byKey(const Key('discover-like')));
+    await tester.pump();
+
+    expect(find.byKey(const Key('like-static-feedback')), findsOneWidget);
+    expect(find.byKey(const Key('like-animation')), findsNothing);
   });
 
   testWidgets('pass button advances to the next profile', (tester) async {

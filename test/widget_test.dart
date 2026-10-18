@@ -11,15 +11,16 @@ void main() {
     expect(find.text('KLiK'), findsOneWidget);
     expect(find.text('Temukan koneksi yang sefrekuensi'), findsOneWidget);
     expect(find.byKey(const Key('klik-brand-heart')), findsOneWidget);
-    expect(find.text('Discover'), findsOneWidget);
-    expect(find.text('Like'), findsOneWidget);
+    expect(find.text('Temukan'), findsOneWidget);
+    expect(find.text('Likes'), findsOneWidget);
     expect(find.text('Chat'), findsOneWidget);
     expect(find.text('Profil'), findsOneWidget);
 
     await tester.tap(find.text('Profil'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Raka, 28'), findsOneWidget);
+    expect(find.text('Alya, 26'), findsOneWidget);
+    expect(find.text('Jakarta'), findsOneWidget);
     expect(find.byType(NavigationBar), findsOneWidget);
   });
 }

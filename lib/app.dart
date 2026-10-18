@@ -91,16 +91,14 @@ class _KliKAppState extends State<KliKApp> {
                 profiles: mockProfiles
                     .where((profile) => likedProfileIds.contains(profile.id))
                     .toList(),
-                onOpenConversation: (profileId) =>
-                    _openConversation(navigatorContext, profileId),
+                onOpenConversation: _openConversation,
               ),
               ChatScreen(
                 profiles: mockProfiles,
-                conversationId: null,
+                conversationId: selectedConversationId,
                 messagesByProfile: messagesByProfile,
-                onOpenConversation: (profileId) =>
-                    _openConversation(navigatorContext, profileId),
-                onBack: () {},
+                onOpenConversation: _openConversation,
+                onBack: () => setState(() => selectedConversationId = null),
                 onSendMessage: _sendMessage,
               ),
               ProfileScreen(profile: mockCurrentProfile),
@@ -116,12 +114,12 @@ class _KliKAppState extends State<KliKApp> {
               NavigationDestination(
                 icon: Icon(Icons.explore_outlined),
                 selectedIcon: Icon(Icons.explore),
-                label: 'Discover',
+                label: 'Temukan',
               ),
               NavigationDestination(
                 icon: Icon(Icons.favorite_border),
                 selectedIcon: Icon(Icons.favorite),
-                label: 'Like',
+                label: 'Likes',
               ),
               NavigationDestination(
                 icon: Icon(Icons.chat_bubble_outline),
@@ -151,7 +149,7 @@ class _KliKAppState extends State<KliKApp> {
             profile: profile,
             onSendMessage: () {
               Navigator.of(routeContext).pop();
-              _openConversation(navigatorContext, profile.id);
+              _openConversation(profile.id);
             },
             onContinue: () => Navigator.of(routeContext).pop(),
           ),
@@ -160,31 +158,11 @@ class _KliKAppState extends State<KliKApp> {
     );
   }
 
-  void _openConversation(BuildContext navigatorContext, String profileId) {
+  void _openConversation(String profileId) {
     setState(() {
       selectedConversationId = profileId;
       activeTabIndex = 2;
     });
-
-    Navigator.of(navigatorContext)
-        .push<void>(
-          MaterialPageRoute<void>(
-            builder: (routeContext) => Scaffold(
-              body: ChatScreen(
-                profiles: mockProfiles,
-                conversationId: selectedConversationId,
-                messagesByProfile: messagesByProfile,
-                onOpenConversation: (nextProfileId) =>
-                    _openConversation(routeContext, nextProfileId),
-                onBack: () => Navigator.of(routeContext).pop(),
-                onSendMessage: _sendMessage,
-              ),
-            ),
-          ),
-        )
-        .whenComplete(() {
-          if (mounted) setState(() => selectedConversationId = null);
-        });
   }
 
   void _sendMessage(String profileId, String text) {

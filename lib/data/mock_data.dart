@@ -3,12 +3,12 @@ import '../models/dating_profile.dart';
 
 const mockCurrentProfile = DatingProfile(
   id: 'current-profile',
-  name: 'Raka',
-  age: 28,
-  city: 'Bandung',
+  name: 'Alya',
+  age: 26,
+  city: 'Jakarta',
   bio: 'Pencinta kopi, musik, dan cerita baru.',
   imageUrl:
-      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=900',
+      'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=900',
   distanceKm: 0,
   interests: ['Kopi', 'Musik', 'Membaca'],
   mutualMatch: false,
@@ -22,7 +22,7 @@ const mockProfiles = <DatingProfile>[
     city: 'Bandung',
     bio: 'Pencinta kopi, buku, perjalanan, dan menikmati senja.',
     imageUrl:
-        'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=900',
+        'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=900',
     distanceKm: 12,
     interests: ['Coffee', 'Books', 'Travel', 'Sunset'],
     mutualMatch: true,

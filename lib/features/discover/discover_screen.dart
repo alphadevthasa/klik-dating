@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
+import 'package:lottie/lottie.dart';
 
 import '../../models/dating_profile.dart';
 import '../../widgets/klik_brand.dart';
@@ -36,8 +39,11 @@ class DiscoverScreen extends StatefulWidget {
 
 class _DiscoverScreenState extends State<DiscoverScreen> {
   final CardSwiperController _controller = CardSwiperController();
+  Timer? _likeFeedbackTimer;
   int _profileIndex = 0;
   int _stackVersion = 0;
+  int _likeAnimationVersion = 0;
+  bool _showLikeFeedback = false;
   ProfileFilter _filter = const ProfileFilter(
     ageRange: RangeValues(18, 40),
     maxDistanceKm: 50,
@@ -65,7 +71,11 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
     };
     if (callback == null) return false;
 
-    callback(widget.profiles[previousIndex]);
+    final profile = widget.profiles[previousIndex];
+    if (direction == CardSwiperDirection.right && !profile.mutualMatch) {
+      _playLikeFeedback(MediaQuery.disableAnimationsOf(context));
+    }
+    callback(profile);
     if (currentIndex != null) {
       setState(() => _profileIndex = currentIndex);
     }
@@ -74,6 +84,36 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
 
   void _onEnd() {
     setState(() => _profileIndex = widget.profiles.length);
+  }
+
+  void _playLikeFeedback(bool reduceMotion) {
+    _likeFeedbackTimer?.cancel();
+    setState(() {
+      _showLikeFeedback = true;
+      _likeAnimationVersion++;
+    });
+    if (reduceMotion) {
+      _likeFeedbackTimer = Timer(
+        const Duration(milliseconds: 600),
+        _hideLikeFeedback,
+      );
+    }
+  }
+
+  void _onLikeAnimationLoaded(LottieComposition composition) {
+    final version = _likeAnimationVersion;
+    _likeFeedbackTimer?.cancel();
+    _likeFeedbackTimer = Timer(composition.duration, () {
+      if (!mounted || version != _likeAnimationVersion) return;
+      _hideLikeFeedback();
+    });
+  }
+
+  void _hideLikeFeedback() {
+    _likeFeedbackTimer?.cancel();
+    if (mounted && _showLikeFeedback) {
+      setState(() => _showLikeFeedback = false);
+    }
   }
 
   void _restart() {
@@ -91,6 +131,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
 
   @override
   void dispose() {
+    _likeFeedbackTimer?.cancel();
     _controller.dispose();
     super.dispose();
   }
@@ -152,9 +193,13 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
             ),
             const SizedBox(height: 8),
             Expanded(
-              child: profile == null
-                  ? _EmptyDiscoverState(onRestart: _restart)
-                  : CardSwiper(
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  if (profile == null)
+                    _EmptyDiscoverState(onRestart: _restart)
+                  else
+                    CardSwiper(
                       key: ValueKey(_stackVersion),
                       controller: _controller,
                       duration: reduceMotion
@@ -184,6 +229,38 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                                 _controller.swipe(CardSwiperDirection.top),
                           ),
                     ),
+                  if (_showLikeFeedback)
+                    Positioned.fill(
+                      child: IgnorePointer(
+                        child: Center(
+                          key: const Key('like-feedback'),
+                          child: SizedBox(
+                            width: 180,
+                            height: 180,
+                            child: reduceMotion
+                                ? Icon(
+                                    Icons.favorite,
+                                    key: const Key('like-static-feedback'),
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
+                                    size: 104,
+                                  )
+                                : KeyedSubtree(
+                                    key: ValueKey(_likeAnimationVersion),
+                                    child: Lottie.asset(
+                                      'assets/animations/like_burst.json',
+                                      key: const Key('like-animation'),
+                                      repeat: false,
+                                      onLoaded: _onLikeAnimationLoaded,
+                                    ),
+                                  ),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ),
           ],
         ),
