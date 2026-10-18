@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 
 import '../../models/dating_profile.dart';
 
@@ -31,7 +32,9 @@ class DiscoverScreen extends StatefulWidget {
 }
 
 class _DiscoverScreenState extends State<DiscoverScreen> {
+  final CardSwiperController _controller = CardSwiperController();
   int _profileIndex = 0;
+  int _stackVersion = 0;
   ProfileFilter _filter = const ProfileFilter(
     ageRange: RangeValues(18, 40),
     maxDistanceKm: 50,
@@ -42,12 +45,38 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
     super.didUpdateWidget(oldWidget);
     if (!listEquals(widget.profiles, oldWidget.profiles)) {
       _profileIndex = 0;
+      _stackVersion++;
     }
   }
 
-  void _decide(DatingProfile profile, ValueChanged<DatingProfile> callback) {
-    callback(profile);
-    setState(() => _profileIndex++);
+  bool _onSwipe(
+    int previousIndex,
+    int? currentIndex,
+    CardSwiperDirection direction,
+  ) {
+    final callback = switch (direction) {
+      CardSwiperDirection.left => widget.onPass,
+      CardSwiperDirection.right => widget.onLike,
+      CardSwiperDirection.top => widget.onSuperLike,
+      _ => null,
+    };
+    if (callback == null) return false;
+
+    callback(widget.profiles[previousIndex]);
+    if (currentIndex != null) {
+      setState(() => _profileIndex = currentIndex);
+    }
+    return true;
+  }
+
+  void _onEnd() {
+    setState(() => _profileIndex = widget.profiles.length);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   Future<void> _showFilter() async {
@@ -61,6 +90,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
     setState(() {
       _filter = filter;
       _profileIndex = 0;
+      _stackVersion++;
     });
     widget.onFilter(filter);
   }
@@ -99,11 +129,30 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                   ? _EmptyDiscoverState(
                       onRestart: () => setState(() => _profileIndex = 0),
                     )
-                  : ProfileCard(
-                      profile: profile,
-                      onPass: () => _decide(profile, widget.onPass),
-                      onLike: () => _decide(profile, widget.onLike),
-                      onSuperLike: () => _decide(profile, widget.onSuperLike),
+                  : CardSwiper(
+                      key: ValueKey(_stackVersion),
+                      controller: _controller,
+                      cardsCount: widget.profiles.length,
+                      initialIndex: _profileIndex,
+                      numberOfCardsDisplayed: 1,
+                      isLoop: false,
+                      allowedSwipeDirection: const AllowedSwipeDirection.only(
+                        left: true,
+                        right: true,
+                        up: true,
+                      ),
+                      onSwipe: _onSwipe,
+                      onEnd: _onEnd,
+                      cardBuilder: (context, index, horizontal, vertical) =>
+                          ProfileCard(
+                            profile: widget.profiles[index],
+                            onPass: () =>
+                                _controller.swipe(CardSwiperDirection.left),
+                            onLike: () =>
+                                _controller.swipe(CardSwiperDirection.right),
+                            onSuperLike: () =>
+                                _controller.swipe(CardSwiperDirection.top),
+                          ),
                     ),
             ),
           ],
@@ -130,99 +179,88 @@ class ProfileCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    var dragDistance = 0.0;
 
     return Column(
       children: [
         Expanded(
-          child: GestureDetector(
-            onHorizontalDragStart: (_) => dragDistance = 0,
-            onHorizontalDragUpdate: (details) =>
-                dragDistance += details.delta.dx,
-            onHorizontalDragEnd: (_) {
-              if (dragDistance < -80) onPass();
-              if (dragDistance > 80) onLike();
-            },
-            child: Card(
-              margin: EdgeInsets.zero,
-              clipBehavior: Clip.antiAlias,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  Image.network(
-                    profile.imageUrl,
-                    fit: BoxFit.cover,
-                    loadingBuilder: (context, child, progress) =>
-                        progress == null
-                        ? child
-                        : const ColoredBox(
-                            color: Color(0xFFF6E4E5),
-                            child: Center(child: CircularProgressIndicator()),
-                          ),
-                    errorBuilder: (context, error, stackTrace) => ColoredBox(
-                      color: colors.secondary,
-                      child: Center(
-                        child: Icon(
-                          Icons.person,
-                          size: 88,
-                          color: colors.primary,
+          child: Card(
+            margin: EdgeInsets.zero,
+            clipBehavior: Clip.antiAlias,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Image.network(
+                  profile.imageUrl,
+                  fit: BoxFit.cover,
+                  loadingBuilder: (context, child, progress) => progress == null
+                      ? child
+                      : const ColoredBox(
+                          color: Color(0xFFF6E4E5),
+                          child: Center(child: CircularProgressIndicator()),
                         ),
+                  errorBuilder: (context, error, stackTrace) => ColoredBox(
+                    color: colors.secondary,
+                    child: Center(
+                      child: Icon(
+                        Icons.person,
+                        size: 88,
+                        color: colors.primary,
                       ),
                     ),
                   ),
-                  const DecoratedBox(
+                ),
+                const DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [Colors.transparent, Colors.black87],
+                      stops: [0.45, 1],
+                    ),
+                  ),
+                ),
+                Positioned(
+                  left: 12,
+                  right: 12,
+                  bottom: 12,
+                  child: DecoratedBox(
+                    key: const Key('profile-text-scrim'),
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [Colors.transparent, Colors.black87],
-                        stops: [0.45, 1],
+                      color: Colors.black.withValues(alpha: 0.7),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            '${profile.name}, ${profile.age}',
+                            style: Theme.of(context).textTheme.headlineSmall
+                                ?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '${profile.city} · ${profile.distanceKm} km dari kamu',
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            profile.bio,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                  Positioned(
-                    left: 12,
-                    right: 12,
-                    bottom: 12,
-                    child: DecoratedBox(
-                      key: const Key('profile-text-scrim'),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.7),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              '${profile.name}, ${profile.age}',
-                              style: Theme.of(context).textTheme.headlineSmall
-                                  ?.copyWith(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '${profile.city} · ${profile.distanceKm} km dari kamu',
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              profile.bio,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),

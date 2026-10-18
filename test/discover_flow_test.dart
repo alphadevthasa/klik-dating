@@ -1,13 +1,18 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:klik/app.dart';
+import 'package:klik/data/mock_data.dart';
+import 'package:klik/features/discover/discover_screen.dart';
+import 'package:klik/models/dating_profile.dart';
 
 void main() {
   testWidgets('pass button advances to the next profile', (tester) async {
     await tester.pumpWidget(const KliKApp());
 
+    expect(find.byType(CardSwiper), findsOneWidget);
     expect(find.text('Salsabila, 22'), findsOneWidget);
     await tester.tap(find.byKey(const Key('discover-pass')));
     await tester.pumpAndSettle();
@@ -26,6 +31,38 @@ void main() {
       find.byType(KliKApp),
     );
     expect(appState.likedProfileIds, contains('profile-1'));
+  });
+
+  testWidgets('swiping left passes the current profile', (tester) async {
+    final passedProfiles = <DatingProfile>[];
+    await _pumpDiscover(
+      tester,
+      onPass: passedProfiles.add,
+      onLike: (_) {},
+      onSuperLike: (_) {},
+    );
+
+    await tester.drag(find.text('Salsabila, 22'), const Offset(-300, 0));
+    await tester.pumpAndSettle();
+
+    expect(passedProfiles.map((profile) => profile.id), ['profile-1']);
+    expect(find.text('Nabila, 25'), findsOneWidget);
+  });
+
+  testWidgets('star button triggers a super-like swipe', (tester) async {
+    final superLikedProfiles = <DatingProfile>[];
+    await _pumpDiscover(
+      tester,
+      onPass: (_) {},
+      onLike: (_) {},
+      onSuperLike: superLikedProfiles.add,
+    );
+
+    await tester.tap(find.byKey(const Key('discover-super-like')));
+    await tester.pumpAndSettle();
+
+    expect(superLikedProfiles.map((profile) => profile.id), ['profile-1']);
+    expect(find.text('Nabila, 25'), findsOneWidget);
   });
 
   testWidgets('profile text scrim keeps 4.5:1 contrast on bright photos', (
@@ -78,6 +115,8 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(const KliKApp());
+    await tester.tap(find.byKey(const Key('discover-pass')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('discover-filter')));
     await tester.pumpAndSettle();
 
@@ -129,6 +168,25 @@ void main() {
     expect(find.text('Salsabila, 22'), findsOneWidget);
   });
 }
+
+Future<void> _pumpDiscover(
+  WidgetTester tester, {
+  required ValueChanged<DatingProfile> onPass,
+  required ValueChanged<DatingProfile> onLike,
+  required ValueChanged<DatingProfile> onSuperLike,
+}) => tester.pumpWidget(
+  MaterialApp(
+    home: Scaffold(
+      body: DiscoverScreen(
+        profiles: mockProfiles,
+        onPass: onPass,
+        onLike: onLike,
+        onSuperLike: onSuperLike,
+        onFilter: (_) {},
+      ),
+    ),
+  ),
+);
 
 Future<void> _dragSliderThumb(
   WidgetTester tester,
