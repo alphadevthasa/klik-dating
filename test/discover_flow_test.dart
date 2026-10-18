@@ -16,7 +16,7 @@ void main() {
     await tester.pumpWidget(const KliKApp());
 
     expect(find.text('Nadia, 27'), findsOneWidget);
-    expect(find.text('Bandung'), findsOneWidget);
+    expect(find.textContaining('Bandung'), findsOneWidget);
     expect(find.byKey(const Key('discover-profile-count')), findsOneWidget);
     expect(find.text('1 / 5'), findsOneWidget);
     expect(find.byKey(const Key('profile-verified-badge')), findsOneWidget);

@@ -30,7 +30,7 @@ class LikesScreen extends StatelessWidget {
               ),
               IconButton(
                 key: const Key('likes-filter'),
-                tooltip: 'Filter Likes',
+                tooltip: 'Atur filter',
                 onPressed: () => _showDemoInfo(context),
                 icon: const Icon(Icons.tune),
               ),
@@ -107,12 +107,12 @@ class LikesScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Likes demo',
+                  'Informasi Likes',
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const SizedBox(height: 8),
-                const Text('Fitur ini hanya demo.'),
-                const Text('Belum ada pembayaran atau langganan.'),
+                const Text('Halaman Likes ini hanya contoh.'),
+                const Text('Tidak ada pembayaran atau langganan.'),
                 const SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,

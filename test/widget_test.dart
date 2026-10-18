@@ -52,6 +52,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byKey(const Key('likes-heading')), findsOneWidget);
+      expect(find.byTooltip('Atur filter'), findsOneWidget);
       expect(find.text('Orang yang tertarik denganmu'), findsOneWidget);
       final grid = tester.widget<GridView>(
         find.byKey(const Key('incoming-likes-grid')),
@@ -82,7 +83,9 @@ void main() {
     await tester.tap(find.byKey(const Key('incoming-like-lock-0')));
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('likes-info-sheet')), findsOneWidget);
-    expect(find.text('Fitur ini hanya demo.'), findsOneWidget);
+    expect(find.text('Informasi Likes'), findsOneWidget);
+    expect(find.text('Halaman Likes ini hanya contoh.'), findsOneWidget);
+    expect(find.text('Tidak ada pembayaran atau langganan.'), findsOneWidget);
     expect(find.text('Berlangganan'), findsNothing);
 
     await tester.tap(find.byKey(const Key('likes-info-close')));
