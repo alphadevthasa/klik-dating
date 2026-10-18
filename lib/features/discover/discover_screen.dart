@@ -181,34 +181,44 @@ class ProfileCard extends StatelessWidget {
                     ),
                   ),
                   Positioned(
-                    left: 20,
-                    right: 20,
-                    bottom: 20,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          '${profile.name}, ${profile.age}',
-                          style: Theme.of(context).textTheme.headlineSmall
-                              ?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700,
-                              ),
+                    left: 12,
+                    right: 12,
+                    bottom: 12,
+                    child: DecoratedBox(
+                      key: const Key('profile-text-scrim'),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.7),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              '${profile.name}, ${profile.age}',
+                              style: Theme.of(context).textTheme.headlineSmall
+                                  ?.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '${profile.city} · ${profile.distanceKm} km dari kamu',
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              profile.bio,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '${profile.city} · ${profile.distanceKm} km dari kamu',
-                          style: const TextStyle(color: Colors.white),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          profile.bio,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(color: Colors.white),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                 ],
