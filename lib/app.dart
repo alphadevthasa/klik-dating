@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 import 'data/mock_data.dart';
 import 'models/chat_message.dart';
 import 'models/dating_profile.dart';
+import 'features/chat/chat_screen.dart';
 import 'features/discover/discover_screen.dart';
+import 'features/likes/likes_screen.dart';
+import 'features/profile/profile_screen.dart';
 
 class KliKApp extends StatefulWidget {
   const KliKApp({super.key});
@@ -29,29 +32,6 @@ class _KliKAppState extends State<KliKApp> {
     for (final entry in mockMessagesByProfile.entries)
       entry.key: List.of(entry.value),
   };
-
-  static const _tabs = [
-    _TabContent(
-      icon: Icons.explore_outlined,
-      title: 'Temukan koneksi baru',
-      message: 'Cerita seru mungkin dimulai dari sini.',
-    ),
-    _TabContent(
-      icon: Icons.favorite_border,
-      title: 'Like pilihanmu',
-      message: 'Profil yang kamu sukai akan muncul di sini.',
-    ),
-    _TabContent(
-      icon: Icons.chat_bubble_outline,
-      title: 'Ruang obrolanmu',
-      message: 'Percakapan hangat dimulai dengan sapaan.',
-    ),
-    _TabContent(
-      icon: Icons.person_outline,
-      title: 'Kenalan lewat profilmu',
-      message: 'Ceritakan sedikit tentang dirimu.',
-    ),
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -109,7 +89,21 @@ class _KliKAppState extends State<KliKApp> {
               onSuperLike: _recordLike,
               onFilter: (filter) => setState(() => profileFilter = filter),
             ),
-            for (final tab in _tabs.skip(1)) _PlaceholderTab(content: tab),
+            LikesScreen(
+              profiles: mockProfiles
+                  .where((profile) => likedProfileIds.contains(profile.id))
+                  .toList(),
+              onOpenConversation: _openConversation,
+            ),
+            ChatScreen(
+              profiles: mockProfiles,
+              conversationId: selectedConversationId,
+              messagesByProfile: messagesByProfile,
+              onOpenConversation: _openConversation,
+              onBack: _closeConversation,
+              onSendMessage: _sendMessage,
+            ),
+            ProfileScreen(profile: mockProfiles.first),
           ],
         ),
         bottomNavigationBar: NavigationBar(
@@ -148,47 +142,26 @@ class _KliKAppState extends State<KliKApp> {
   void _recordLike(DatingProfile profile) {
     setState(() => likedProfileIds.add(profile.id));
   }
-}
 
-class _TabContent {
-  const _TabContent({
-    required this.icon,
-    required this.title,
-    required this.message,
-  });
+  void _openConversation(String profileId) {
+    setState(() {
+      selectedConversationId = profileId;
+      activeTabIndex = 2;
+    });
+  }
 
-  final IconData icon;
-  final String title;
-  final String message;
-}
+  void _closeConversation() {
+    setState(() => selectedConversationId = null);
+  }
 
-class _PlaceholderTab extends StatelessWidget {
-  const _PlaceholderTab({required this.content});
+  void _sendMessage(String profileId, String text) {
+    final message = text.trim();
+    if (message.isEmpty) return;
 
-  final _TabContent content;
-
-  @override
-  Widget build(BuildContext context) => Center(
-    child: Padding(
-      padding: const EdgeInsets.all(32),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            content.icon,
-            size: 48,
-            color: Theme.of(context).colorScheme.primary,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            content.title,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          const SizedBox(height: 8),
-          Text(content.message, textAlign: TextAlign.center),
-        ],
-      ),
-    ),
-  );
+    setState(() {
+      messagesByProfile
+          .putIfAbsent(profileId, () => [])
+          .add(ChatMessage(text: message, isMine: true, timeLabel: 'Sekarang'));
+    });
+  }
 }
