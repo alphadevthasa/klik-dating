@@ -248,7 +248,27 @@ Create a compact custom header with avatar/name/age/online status, call and over
 
 Run `flutter test test/chat_flow_test.dart` and `flutter analyze`. Expected: visual assertions, local send, empty-send handling, back-to-list, and keyboard layout pass.
 
-## Task 10: Rebuild Likes and Profil tabs to reference
+## Task 10: Fix Discover overflow at phone width
+
+**Files:** `lib/features/discover/discover_screen.dart`, `test/widget_test.dart`
+
+**Interfaces:**
+- Location and distance copy wraps or ellipsizes within profile card width.
+- Discover layout must produce no render exception at a 390×844 logical-pixel viewport.
+
+- [ ] **Step 1: Add the compact-width regression test**
+
+Pump `KliKApp` at 390×844 logical pixels, settle layout, and assert `tester.takeException()` is null. Run `flutter test test/widget_test.dart --plain-name 'Discover layout fits a 390x844 viewport'`; confirm the current location row overflows.
+
+- [ ] **Step 2: Constrain location copy**
+
+Place the combined city/distance text in `Expanded` or `Flexible`, cap it at two lines, and use ellipsis for overflow. Keep the location icon and scrim styling intact.
+
+- [ ] **Step 3: Verify phone-width layout**
+
+Run the focused widget test, `flutter test test/widget_test.dart`, and `flutter analyze`. Expected: no RenderFlex overflow at 390×844 and no regression to brand/profile assertions.
+
+## Task 11: Rebuild Likes and Profil tabs to reference
 
 **Files:** `lib/app.dart`, `lib/data/mock_data.dart`, `lib/features/likes/likes_screen.dart`, `lib/features/profile/profile_screen.dart`, `test/widget_test.dart`, `test/chat_flow_test.dart`
 
@@ -273,7 +293,7 @@ Likes uses a two-column grid; blur photo tiles, overlay a centered lock, and sho
 
 Run `flutter test test/widget_test.dart test/chat_flow_test.dart` and `flutter analyze`. Expected: both reference screens render, local edit/photo choices update state, and bottom navigation remains persistent.
 
-## Task 11: Run full visual and functional acceptance
+## Task 12: Run full visual and functional acceptance
 
 **Files:** all app and test files above.
 
