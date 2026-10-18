@@ -107,7 +107,7 @@ class _MatchVisual extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final photoSize = (constraints.maxWidth * 0.43).clamp(104.0, 136.0);
+        final photoSize = (constraints.maxWidth * 0.43).clamp(0.0, 136.0);
         final overlap = photoSize * 0.18;
 
         return Stack(

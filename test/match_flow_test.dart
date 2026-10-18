@@ -101,6 +101,51 @@ void main() {
     );
   });
 
+  testWidgets('landscape match layout keeps photos clear of visible actions', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(844, 390);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: MatchScreen(
+            profile: mockProfiles.first,
+            onSendMessage: () {},
+            onContinue: () {},
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+
+    final alyaPhoto = find.byWidgetPredicate(
+      (widget) => widget is Image && widget.semanticLabel == 'Foto Alya',
+    );
+    final nadiaPhoto = find.byWidgetPredicate(
+      (widget) => widget is Image && widget.semanticLabel == 'Foto Nadia',
+    );
+    final titleTop = tester.getTopLeft(find.text('Kalian cocok!')).dy;
+    expect(tester.getRect(alyaPhoto).bottom, lessThanOrEqualTo(titleTop));
+    expect(tester.getRect(nadiaPhoto).bottom, lessThanOrEqualTo(titleTop));
+
+    for (final label in ['Kirim pesan', 'Lanjut lihat profil lain']) {
+      final action = find.text(label);
+      await tester.ensureVisible(action);
+      expect(action, findsOneWidget);
+      expect(tester.getRect(action).top, greaterThanOrEqualTo(0));
+      expect(
+        tester.getRect(action).bottom,
+        lessThanOrEqualTo(tester.view.physicalSize.height),
+      );
+    }
+  });
+
   testWidgets('continue returns to Discover after a mutual match', (
     tester,
   ) async {
