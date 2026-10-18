@@ -6,6 +6,7 @@ import 'models/dating_profile.dart';
 import 'features/chat/chat_screen.dart';
 import 'features/discover/discover_screen.dart';
 import 'features/likes/likes_screen.dart';
+import 'features/match/match_screen.dart';
 import 'features/profile/profile_screen.dart';
 
 class KliKApp extends StatefulWidget {
@@ -86,8 +87,9 @@ class _KliKAppState extends State<KliKApp> {
               DiscoverScreen(
                 profiles: discoverProfiles,
                 onPass: (_) {},
-                onLike: _recordLike,
-                onSuperLike: _recordLike,
+                onLike: (profile) => _recordLike(navigatorContext, profile),
+                onSuperLike: (profile) =>
+                    _recordLike(navigatorContext, profile),
                 onFilter: (filter) => setState(() => profileFilter = filter),
               ),
               LikesScreen(
@@ -143,8 +145,24 @@ class _KliKAppState extends State<KliKApp> {
     );
   }
 
-  void _recordLike(DatingProfile profile) {
+  void _recordLike(BuildContext navigatorContext, DatingProfile profile) {
     setState(() => likedProfileIds.add(profile.id));
+    if (!profile.mutualMatch) return;
+
+    Navigator.of(navigatorContext).push<void>(
+      MaterialPageRoute<void>(
+        builder: (routeContext) => Scaffold(
+          body: MatchScreen(
+            profile: profile,
+            onSendMessage: () {
+              Navigator.of(routeContext).pop();
+              _openConversation(navigatorContext, profile.id);
+            },
+            onContinue: () => Navigator.of(routeContext).pop(),
+          ),
+        ),
+      ),
+    );
   }
 
   void _openConversation(BuildContext navigatorContext, String profileId) {
