@@ -35,6 +35,30 @@ void main() {
     expect(appState.messagesByProfile['profile-2'].length, messageCount + 1);
   });
 
+  testWidgets('composer remains above the visible keyboard', (tester) async {
+    await tester.pumpWidget(const KliKApp());
+    await tester.tap(find.text('Chat'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Nabila, 25'));
+    await tester.pumpAndSettle();
+    tester.view.viewInsets = const FakeViewPadding(bottom: 300);
+    await tester.showKeyboard(find.byKey(const Key('chat-composer')));
+    await tester.pumpAndSettle();
+
+    expect(tester.view.viewInsets.bottom, 300);
+    final keyboardTop =
+        (tester.view.physicalSize.height - tester.view.viewInsets.bottom) /
+        tester.view.devicePixelRatio;
+    expect(
+      tester.getRect(find.byKey(const Key('chat-composer'))).bottom,
+      lessThanOrEqualTo(keyboardTop),
+    );
+    expect(
+      tester.getRect(find.byKey(const Key('chat-send'))).bottom,
+      lessThanOrEqualTo(keyboardTop),
+    );
+  });
+
   testWidgets('conversation back returns to list and tab navigation works', (
     tester,
   ) async {

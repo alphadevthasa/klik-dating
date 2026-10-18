@@ -73,6 +73,19 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
     setState(() => _profileIndex = widget.profiles.length);
   }
 
+  void _restart() {
+    const defaultFilter = ProfileFilter(
+      ageRange: RangeValues(18, 40),
+      maxDistanceKm: 50,
+    );
+    setState(() {
+      _filter = defaultFilter;
+      _profileIndex = 0;
+      _stackVersion++;
+    });
+    widget.onFilter(defaultFilter);
+  }
+
   @override
   void dispose() {
     _controller.dispose();
@@ -126,9 +139,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
             const SizedBox(height: 8),
             Expanded(
               child: profile == null
-                  ? _EmptyDiscoverState(
-                      onRestart: () => setState(() => _profileIndex = 0),
-                    )
+                  ? _EmptyDiscoverState(onRestart: _restart)
                   : CardSwiper(
                       key: ValueKey(_stackVersion),
                       controller: _controller,

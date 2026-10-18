@@ -65,6 +65,22 @@ void main() {
     expect(find.text('Nabila, 25'), findsOneWidget);
   });
 
+  testWidgets('swiping up triggers a super-like', (tester) async {
+    final superLikedProfiles = <DatingProfile>[];
+    await _pumpDiscover(
+      tester,
+      onPass: (_) {},
+      onLike: (_) {},
+      onSuperLike: superLikedProfiles.add,
+    );
+
+    await tester.drag(find.text('Salsabila, 22'), const Offset(0, -300));
+    await tester.pumpAndSettle();
+
+    expect(superLikedProfiles.map((profile) => profile.id), ['profile-1']);
+    expect(find.text('Nabila, 25'), findsOneWidget);
+  });
+
   testWidgets('profile text scrim keeps 4.5:1 contrast on bright photos', (
     tester,
   ) async {
@@ -109,6 +125,30 @@ void main() {
       greaterThanOrEqualTo(4.5),
       reason: 'White profile copy must contrast with a worst-case white photo.',
     );
+  });
+
+  testWidgets('profile image failure shows the fallback icon', (tester) async {
+    const brokenProfile = DatingProfile(
+      id: 'broken-image',
+      name: 'Test',
+      age: 24,
+      city: 'Bandung',
+      bio: 'Demo profile',
+      imageUrl: 'https://invalid.example/profile.jpg',
+      distanceKm: 2,
+      interests: [],
+      mutualMatch: false,
+    );
+    await _pumpDiscover(
+      tester,
+      profiles: const [brokenProfile],
+      onPass: (_) {},
+      onLike: (_) {},
+      onSuperLike: (_) {},
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.person), findsOneWidget);
   });
 
   testWidgets('filter keeps only profiles matching age and distance', (
@@ -167,10 +207,42 @@ void main() {
 
     expect(find.text('Salsabila, 22'), findsOneWidget);
   });
+
+  testWidgets('restart clears filters and restores all profiles', (
+    tester,
+  ) async {
+    await tester.pumpWidget(const KliKApp());
+    await tester.tap(find.byKey(const Key('discover-filter')));
+    await tester.pumpAndSettle();
+    await _dragSliderThumb(
+      tester,
+      find.byType(RangeSlider),
+      from: 40,
+      to: 18,
+      min: 18,
+      max: 40,
+    );
+    await tester.tap(find.text('Terapkan'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Untuk saat ini, belum ada profil baru.'), findsOneWidget);
+    await tester.tap(find.text('Mulai lagi'));
+    await tester.pumpAndSettle();
+
+    final names = ['Salsabila, 22', 'Nabila, 25', 'Kirana, 29', 'Alya, 27'];
+    for (var index = 0; index < names.length; index++) {
+      expect(find.text(names[index]), findsOneWidget);
+      if (index < names.length - 1) {
+        await tester.tap(find.byKey(const Key('discover-pass')));
+        await tester.pumpAndSettle();
+      }
+    }
+  });
 }
 
 Future<void> _pumpDiscover(
   WidgetTester tester, {
+  List<DatingProfile> profiles = mockProfiles,
   required ValueChanged<DatingProfile> onPass,
   required ValueChanged<DatingProfile> onLike,
   required ValueChanged<DatingProfile> onSuperLike,
@@ -178,7 +250,7 @@ Future<void> _pumpDiscover(
   MaterialApp(
     home: Scaffold(
       body: DiscoverScreen(
-        profiles: mockProfiles,
+        profiles: profiles,
         onPass: onPass,
         onLike: onLike,
         onSuperLike: onSuperLike,
