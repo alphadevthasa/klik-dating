@@ -6,7 +6,7 @@ membuka percakapan, dan mengedit profil.
 
 ## Demo iOS
 
-[https://github.com/user-attachments/assets/152c2a1f-4121-4587-bd26-e789d1809544](https://github.com/user-attachments/assets/152c2a1f-4121-4587-bd26-e789d1809544)
+<a href="https://github.com/user-attachments/assets/152c2a1f-4121-4587-bd26-e789d1809544">https://github.com/user-attachments/assets/152c2a1f-4121-4587-bd26-e789d1809544</a>
 
 https://github.com/user-attachments/assets/152c2a1f-4121-4587-bd26-e789d1809544
 
