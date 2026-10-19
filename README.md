@@ -6,7 +6,7 @@ membuka percakapan, dan mengedit profil.
 
 ## Demo iOS
 
-[▶️ Putar video demo iOS](docs/media/klik-ios-demo.mp4)
+https://github.com/user-attachments/assets/152c2a1f-4121-4587-bd26-e789d1809544
 
 Demo memperlihatkan urutan **Temukan (swipe profil) → Likes → Chat → Profil**.
 
