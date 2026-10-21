@@ -6,9 +6,9 @@ membuka percakapan, dan mengedit profil.
 
 ## Demo iOS
 
-<a href="https://github.com/user-attachments/assets/152c2a1f-4121-4587-bd26-e789d1809544">https://github.com/user-attachments/assets/152c2a1f-4121-4587-bd26-e789d1809544</a>
+<a href="https://github.com/user-attachments/assets/5be574a8-2b4d-4f80-9169-603833f9831b">https://github.com/user-attachments/assets/5be574a8-2b4d-4f80-9169-603833f9831b</a>
 
-https://github.com/user-attachments/assets/152c2a1f-4121-4587-bd26-e789d1809544
+https://github.com/user-attachments/assets/5be574a8-2b4d-4f80-9169-603833f9831b
 
 Demo memperlihatkan urutan **Temukan (swipe profil) → Likes → Chat → Profil**.
 
